@@ -1,0 +1,11 @@
+*.pt
+*.bin
+*.pth
+*.xlsx
+*.log
+.*
+cache_dir/
+saved_model_dir/
+__pycache__/
+!/.gitignore
+!data/1/
