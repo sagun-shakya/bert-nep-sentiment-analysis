@@ -23,7 +23,7 @@ def train(model, train_df, val_df, device,
           epochs = 10, 
           early_max_stopping = 7):
 
-    train_dataloader = torch.utils.data.DataLoader(train_df, batch_size = batch_size, shuffle=True)
+    train_dataloader = torch.utils.data.DataLoader(train_df, batch_size = batch_size)
     val_dataloader = torch.utils.data.DataLoader(val_df, batch_size = batch_size)
 
     criterion = nn.CrossEntropyLoss()
@@ -32,7 +32,6 @@ def train(model, train_df, val_df, device,
     # Use CUDA.
     use_cuda = torch.cuda.is_available()
     if use_cuda:
-            model = model.cuda()
             criterion = criterion.cuda()
 
     # Cache.
@@ -111,7 +110,7 @@ def train(model, train_df, val_df, device,
         train_acc, train_pr, train_rec, train_f1, train_auc = classification_metrics(y_train_total, y_pred_train_total)
 
         ## Validation set.
-        val_loss, val_cat_acc, val_acc, val_pr, val_rec, val_f1, val_auc = evaluate(val_dataloader, model, device, criterion)
+        val_loss, val_cat_acc, val_acc, val_pr, val_rec, val_f1, val_auc = evaluate(val_dataloader, model, device, criterion, mode = 'validation')
         
         # Checkpoint.
         if val_loss < best_val_loss:

@@ -4,15 +4,18 @@ Created on Wed Mar  2 11:52:44 2022
 
 @author: Sagun Shakya
 """
-
+from os.path import join
 import torch
+from torch.utils.data import DataLoader
 import argparse
 from transformers import BertTokenizer
+from pandas import DataFrame
 
 # Local Modules.
 from model import BertClassifier
-from utils import count_parameters
+from utils import count_parameters, current_timestamp
 from trainer import train
+from evaluator import evaluate
 from load_data import load_nepsa_dataset
 
 def parse_args():
@@ -67,7 +70,10 @@ def main():
                            bidirectional = True, 
                            hidden_dim = args.hidden_dim, 
                            output_dim = args.output_dim)
-    
+
+    if use_cuda:
+            model = model.cuda()
+
     # Freeze BERT layers.
     for name, param in model.named_parameters():                
         if name.startswith('bert'):
@@ -89,6 +95,31 @@ def main():
                      epochs = args.epochs,
                      early_max_stopping = 7)
     
+    # Testing phase.
+    test_dataloader = DataLoader(test_df, batch_size = args.batch_size, shuffle=False)
+    test_results = evaluate(test_dataloader, model, device, criterion = None, mode = 'test')
+    test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc = test_results
+
+    # Cache.
+    ## Store info regarding loss and other metrics.
+    cols = ('testing categorical accuracy',
+            'testing accuracy',
+            'testing precision',
+            'testing recall',
+            'testing f1 score',
+            'testing roc-auc score')
+
+    cache_test = dict(zip(cols, test_results))
+
+    # Save cache.
+    test_cache_filepath = join(args.cache_dir, f'test_results_{current_timestamp()}.csv')
+    DataFrame(cache_test, index = [0]).to_csv(test_cache_filepath)
+
+    # Verbose.
+    print("Test results:\n")
+    print('-'*len("Test results:"))
+    for k,v in cache_test.items():
+        print(f'{k} : {v : .3f}')
     
 if __name__ == '__main__':
     main()
