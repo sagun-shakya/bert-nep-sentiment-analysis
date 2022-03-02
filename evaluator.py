@@ -27,7 +27,7 @@ def evaluate(dataloader, model, device, criterion):
             output = model(input_id, mask)
 
             # Loss.
-            batch_loss = criterion(output, label.type(torch.LongTensor))
+            batch_loss = criterion(output, label.type(torch.LongTensor).to(device))
             total_loss += batch_loss.item()
 
             # Applying softmax to the output for accuracy and other metrics.

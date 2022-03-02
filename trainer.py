@@ -79,7 +79,7 @@ def train(model, train_df, val_df, device,
             output = model(input_id, mask)
             
 
-            batch_loss = criterion(output, train_label.type(torch.LongTensor))
+            batch_loss = criterion(output, train_label.type(torch.LongTensor).to(device))
             total_loss_train += batch_loss.item()
 
             # Applying softmax to the output for accuracy and other metrics.
