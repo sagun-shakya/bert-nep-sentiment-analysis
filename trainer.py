@@ -108,7 +108,7 @@ def train(model, train_df, val_df, device,
         train_loss = total_loss_train / len(train_dataloader)
         train_cat_acc = total_acc_train / len(train_dataloader)
 
-        train_acc, train_pr, train_rec, train_f1, train_auc = classification_metrics(true = y_train_total, predicted = y_pred_train_total)
+        train_acc, train_pr, train_rec, train_f1, train_auc = classification_metrics(y_train_total, y_pred_train_total)
 
         ## Validation set.
         val_loss, val_cat_acc, val_acc, val_pr, val_rec, val_f1, val_auc = evaluate(val_dataloader, model, device, criterion)
@@ -116,6 +116,12 @@ def train(model, train_df, val_df, device,
         # Checkpoint.
         if val_loss < best_val_loss:
             best_val_loss = val_loss
+            
+            # Save model.
+            if not os.path.exists(model_save_path):
+                os.mkdir('saved_model_dir')
+                model_save_path = 'saved_model_dir'
+                
             torch.save({'epoch': epoch_num + 1, 'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}, os.path.join(model_save_path, 'model_checkpoint.pt'))
             print(f'Model saved at {model_save_path} on {current_timestamp()}.\n')
             counter = 0
@@ -142,7 +148,11 @@ def train(model, train_df, val_df, device,
         if counter >= early_max_stopping:
             print('Maximum tolerance reached! Breaking the training loop.\n')
             break
-
+        
+        if not os.path.exists(cache_save_path):
+            os.mkdir('cache_dir')
+            cache_save_path = 'cache_dir'
+            
         cache_df = DataFrame(cache, columns = cols).to_csv(os.path.join(cache_save_path, f'cache_{current_timestamp()}.csv'))
 
     total_end_time = time()

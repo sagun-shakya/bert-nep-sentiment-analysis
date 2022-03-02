@@ -46,7 +46,7 @@ def evaluate(dataloader, model, device, criterion):
             total_examples += n
 
         assert len(y_pred_total) == len(y_true_total)
-        acc, pr, rec, f1, auc = classification_metrics(true = y_true_total, predicted = y_pred_total)
+        acc, pr, rec, f1, auc = classification_metrics(y_true_total, y_pred_total)
         
         loss_average = total_loss / len(dataloader)
         cat_acc_average = total_cat_acc / len(dataloader)
