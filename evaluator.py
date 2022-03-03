@@ -10,6 +10,9 @@ def evaluate(dataloader, model, device, criterion, mode = 'validation'):
     mode = mode.lower()
     assert mode == 'validation' or mode == 'test', "The eval mode should be one of {'validation', 'test'}."
 
+    print(f"Performing {mode}...\n")
+    
+    
     model.eval()
     total_loss = 0
     total_cat_acc = 0
@@ -57,6 +60,6 @@ def evaluate(dataloader, model, device, criterion, mode = 'validation'):
         cat_acc_average = total_cat_acc / len(dataloader)
 
         if mode == 'validation':
-            return loss_average, cat_acc_average, acc, pr, rec, f1, auc
+            return loss_average, cat_acc_average, acc, pr, rec, f1, auc, (y_true_total, y_pred_total)
         elif mode == 'test':
-            return cat_acc_average, acc, pr, rec, f1, auc
+            return cat_acc_average, acc, pr, rec, f1, auc, (y_true_total, y_pred_total)
