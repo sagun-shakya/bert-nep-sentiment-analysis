@@ -5,7 +5,7 @@ from time import time
 from transformers import AdamW
 from tqdm import tqdm
 from pandas import DataFrame
-from numpy import zeros, nan
+from numpy import zeros, nan, empty
 import os
 
 from warnings import filterwarnings
@@ -21,7 +21,7 @@ def train(model, train_df, val_df, device,
           cache_save_path, 
           learning_rate, 
           epochs, 
-          early_max_stopping = 7):
+          early_max_stopping = 10):
 
     train_dataloader = torch.utils.data.DataLoader(train_df, batch_size = batch_size)
     val_dataloader = torch.utils.data.DataLoader(val_df, batch_size = batch_size)
@@ -51,13 +51,13 @@ def train(model, train_df, val_df, device,
             'validation f1 score',
             'validation roc-auc score')
 
-    cache = zeros((epochs, len(cols)))
+    cache = empty((epochs, len(cols)))
     best_val_loss = float('inf')
     total_start_time = time()
     counter = 0
 
     # Store validation predictions.
-    pred_store = {f'Epoch {ii+1}' : nan for ii in range(epochs)}
+    pred_store = dict()
 
     for epoch_num in range(epochs):
 
@@ -116,8 +116,8 @@ def train(model, train_df, val_df, device,
         val_loss, val_cat_acc, val_acc, val_pr, val_rec, val_f1, val_auc, (y_true_val, y_pred_val) = evaluate(val_dataloader, model, device, criterion, mode = 'validation')
         
         # Store val predictions.
-        pred_store[f'Epoch {epoch_num + 1}'] = y_pred_val
         pred_store['True Labels'] = y_true_val
+        pred_store[f'Epoch {epoch_num + 1}'] = y_pred_val
 
         # Checkpoint.
         if val_loss < best_val_loss:
@@ -127,8 +127,16 @@ def train(model, train_df, val_df, device,
             if not os.path.exists(model_save_path):
                 os.mkdir('saved_model_dir')
                 model_save_path = 'saved_model_dir'
-                
-            torch.save({'epoch': epoch_num + 1, 'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}, os.path.join(model_save_path, 'model_checkpoint.pt'))
+
+            save_params = {'epoch': epoch_num + 1, 
+                            'state_dict': model.state_dict(),
+                            'optimizer': optimizer.state_dict(),
+                            'train_loss': train_loss,
+                            'train_accuracy': train_acc,
+                            'val_loss': val_loss,
+                            'val_accuracy': val_acc}
+                               
+            torch.save(save_params, os.path.join(model_save_path, 'model_checkpoint.pt'))
             print(f'Model saved at {model_save_path} on {current_timestamp()}.\n')
             counter = 0
         else:
