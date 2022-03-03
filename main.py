@@ -10,7 +10,8 @@ from torch.utils.data import DataLoader
 import argparse
 from transformers import BertTokenizer
 from pandas import DataFrame
-from wandb import visualize
+import random
+from numpy import random as rdm
 
 # Local Modules.
 from model import BertClassifier
@@ -18,6 +19,14 @@ from utils import count_parameters, current_timestamp, visualize_learning
 from trainer import train
 from evaluator import evaluate
 from load_data import load_nepsa_dataset
+
+# Determinism.
+SEED = 1234
+
+random.seed(SEED)
+rdm.seed(SEED)
+torch.manual_seed(SEED)
+torch.backends.cudnn.deterministic = True
 
 def parse_args():
     parser = argparse.ArgumentParser(description="NepSA BERT Argument Parser.")
@@ -36,7 +45,7 @@ def parse_args():
                         help = 'Total number of epochs.')
     parser.add_argument('--batch_size', type = int, default = 8,
                         help = 'Number of sentences in a batch.')
-    parser.add_argument('-l', '--learning_rate', type = float, default = 0.05,
+    parser.add_argument('-l', '--learning_rate', type = float, default = 0.001,
                         help = 'Learning Rate.')
     parser.add_argument('--n_layers', type = int, default = 1,
                         help = 'Number of Bi-LSTM layers.')
