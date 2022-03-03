@@ -5,7 +5,7 @@ from time import time
 from transformers import AdamW
 from tqdm import tqdm
 from pandas import DataFrame
-from numpy import zeros
+from numpy import zeros, nan
 import os
 
 from warnings import filterwarnings
@@ -19,8 +19,8 @@ def train(model, train_df, val_df, device,
           batch_size, 
           model_save_path, 
           cache_save_path, 
-          learning_rate = 0.01, 
-          epochs = 10, 
+          learning_rate, 
+          epochs, 
           early_max_stopping = 7):
 
     train_dataloader = torch.utils.data.DataLoader(train_df, batch_size = batch_size)
@@ -55,6 +55,9 @@ def train(model, train_df, val_df, device,
     best_val_loss = float('inf')
     total_start_time = time()
     counter = 0
+
+    # Store validation predictions.
+    pred_store = {f'Epoch {ii+1}' : nan for ii in range(epochs)}
 
     for epoch_num in range(epochs):
 
@@ -110,8 +113,12 @@ def train(model, train_df, val_df, device,
         train_acc, train_pr, train_rec, train_f1, train_auc = classification_metrics(y_train_total, y_pred_train_total)
 
         ## Validation set.
-        val_loss, val_cat_acc, val_acc, val_pr, val_rec, val_f1, val_auc = evaluate(val_dataloader, model, device, criterion, mode = 'validation')
+        val_loss, val_cat_acc, val_acc, val_pr, val_rec, val_f1, val_auc, (y_true_val, y_pred_val) = evaluate(val_dataloader, model, device, criterion, mode = 'validation')
         
+        # Store val predictions.
+        pred_store[f'Epoch {epoch_num + 1}'] = y_pred_val
+        pred_store['True Labels'] = y_true_val
+
         # Checkpoint.
         if val_loss < best_val_loss:
             best_val_loss = val_loss
@@ -152,7 +159,7 @@ def train(model, train_df, val_df, device,
             os.mkdir('cache_dir')
             cache_save_path = 'cache_dir'
             
-        cache_df = DataFrame(cache, columns = cols).to_csv(os.path.join(cache_save_path, f'cache_{current_timestamp()}.csv'))
+        cache_df = DataFrame(cache, columns = cols).to_csv(os.path.join(cache_save_path, f'cache_{current_timestamp().split()[0]}.csv'), index = False)
 
     total_end_time = time()
 
@@ -160,6 +167,9 @@ def train(model, train_df, val_df, device,
     epoch_mins, epoch_secs = epoch_time(total_start_time, total_end_time)
     print("Training Complete!")
     print("Time Elapsed: %dm %ds"%(epoch_mins, epoch_secs))
+
+    # Store validation results.        
+    cache_val_preds = DataFrame(pred_store).to_csv(os.path.join(cache_save_path, f'val_preds_{current_timestamp()}.csv'), index = False)
 
     return cache_df
                  
