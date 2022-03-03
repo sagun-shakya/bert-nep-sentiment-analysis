@@ -10,10 +10,11 @@ from torch.utils.data import DataLoader
 import argparse
 from transformers import BertTokenizer
 from pandas import DataFrame
+from wandb import visualize
 
 # Local Modules.
 from model import BertClassifier
-from utils import count_parameters, current_timestamp
+from utils import count_parameters, current_timestamp, visualize_learning
 from trainer import train
 from evaluator import evaluate
 from load_data import load_nepsa_dataset
@@ -43,6 +44,8 @@ def parse_args():
                         help = 'Number of Hidden dimensions of LSTM.')
     parser.add_argument('-o', '--output_dim', type = int, default = 2,
                         help = 'Number of logits in the finar linear layer.')
+    parser.add_argument('-v', '--visualize', action = 'store_true', default = False,
+                        help = 'Whether to viaualize the learning curves.')
 
     
     
@@ -98,7 +101,7 @@ def main():
     # Testing phase.
     test_dataloader = DataLoader(test_df, batch_size = args.batch_size, shuffle=False)
     test_results = evaluate(test_dataloader, model, device, criterion = None, mode = 'test')
-    test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc = test_results
+    test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc, (y_true_total, y_pred_total) = test_results
 
     # Cache.
     ## Store info regarding loss and other metrics.
@@ -120,6 +123,13 @@ def main():
     print('-'*len("Test results:"))
     for k,v in cache_test.items():
         print(f'{k} : {v : .3f}')
+
+    # Visualization.
+    if args.visualize:
+        visualize_learning(cache_df)
+        
+
+
     
 if __name__ == '__main__':
     main()
