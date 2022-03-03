@@ -2,6 +2,7 @@
 from datetime import datetime
 import torch
 from numpy import zeros
+import matplotlib.pyplot as plt
 
 def epoch_time(start_time, end_time):
     '''
@@ -110,3 +111,49 @@ def classification_metrics(actual, predicted):
     roc = f1 - (np.random.random()/50)
     
     return acc, pr, rec, f1, roc
+
+def visualize_learning(cache_df):
+    plt.figure(figsize = (18,6))
+    plt.style.use('classic')
+
+    plt.subplot(1,2,1)
+    plt.plot(cache_df['training loss'], color = 'tomato', label = 'train')
+    plt.plot(cache_df['validation loss'], color = 'steelblue', label = 'validation')
+    plt.legend()
+    plt.xlabel('Epochs')
+    plt.title('Loss curves')
+
+    plt.subplot(1,2,2)
+    plt.plot(cache_df['training accuracy'], color = 'tomato', label = 'train')
+    plt.plot(cache_df['validation accuracy'], color = 'steelblue', label = 'validation')
+    plt.legend()
+    plt.xlabel('Epochs')
+    plt.title('Accuracy')
+
+    plt.show()
+
+    plt.figure(figsize = (18,6))
+    plt.style.use('classic')
+
+    plt.subplot(1,3,1)
+    plt.plot(cache_df['training precision'], color = 'tomato', label = 'train')
+    plt.plot(cache_df['validation precision'], color = 'steelblue', label = 'validation')
+    plt.legend()
+    plt.xlabel('Epochs')
+    plt.title('Precision')
+
+    plt.subplot(1,3,2)
+    plt.plot(cache_df['training recall'], color = 'tomato', label = 'train')
+    plt.plot(cache_df['validation recall'], color = 'steelblue', label = 'validation')
+    plt.legend()
+    plt.xlabel('Epochs')
+    plt.title('Recall')
+
+    plt.subplot(1,3,3)
+    plt.plot(cache_df['training f1 score'], color = 'tomato', label = 'train')
+    plt.plot(cache_df['validation f1 score'], color = 'steelblue', label = 'validation')
+    plt.legend()
+    plt.xlabel('Epochs')
+    plt.title('F1 Score')
+
+    plt.show()
