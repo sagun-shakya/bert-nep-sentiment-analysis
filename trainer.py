@@ -118,11 +118,11 @@ def train(model, train_df, val_df, device, args):
             best_val_loss = val_loss
             
             # Save model.
-            if not os.path.exists(args.model_save_path):
+            if not os.path.exists(args.model_save_dir):
                 os.mkdir('saved_model_dir')
                 model_save_path = 'saved_model_dir'
             else:
-                model_save_path = args.model_save_path
+                model_save_path = args.model_save_dir
 
             save_params = {'epoch': epoch_num + 1, 
                             'state_dict': model.state_dict(),
@@ -154,9 +154,11 @@ def train(model, train_df, val_df, device, args):
         cache[epoch_num, :] = [train_loss, train_cat_acc, train_acc, train_pr, train_rec, train_f1, train_auc,
                                val_loss, val_cat_acc, val_acc, val_pr, val_rec, val_f1, val_auc]
         
-        if not os.path.exists(cache_save_path):
+        if not os.path.exists(args.cache_dir):
             os.mkdir('cache_dir')
             cache_save_path = 'cache_dir'
+        else:
+            cache_save_path = args.cache_dir
             
         cache_df = DataFrame(cache, columns = cols).to_csv(os.path.join(cache_save_path, f'cache_{current_timestamp().split()[0]}.csv'), index = False)
 
