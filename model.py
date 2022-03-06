@@ -2,7 +2,7 @@ from transformers import BertModel
 import torch.nn as nn
 import torch
 
-class BertClassifier(nn.Module):
+class BertClassifier_LSTM(nn.Module):
     '''
     - pooled_output : (batch_size, bert_output_dim = 768)
     - sequence_output : (batch_size, seq_len = 512, bert_output_dim = 768)
@@ -44,4 +44,22 @@ class BertClassifier(nn.Module):
                 
         output = self.fc(hidden)     # Shape : [batch size, out dim]
         return output
+
+class BertClassifier_Linear(nn.Module):
+
+    def __init__(self, BERT_MODEL_NAME, output_dim = 2, dropout=0.5):
+
+        super(BertClassifier_Linear, self).__init__()
+
+        self.bert = BertModel.from_pretrained(BERT_MODEL_NAME)
+        self.dropout = nn.Dropout(dropout)
+        self.linear = nn.Linear(768, output_dim)
+
+    def forward(self, input_id, mask):
+        with torch.no_grad():
+            _, pooled_output = self.bert(input_ids = input_id, attention_mask = mask, return_dict = False)
+
+        dropout_output = self.dropout(pooled_output)
+        linear_output = self.linear(dropout_output)
+        return linear_output
         
