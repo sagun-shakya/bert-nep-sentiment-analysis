@@ -53,7 +53,11 @@ class BertClassifier_Linear(nn.Module):
 
         self.bert = BertModel.from_pretrained(BERT_MODEL_NAME)
         self.dropout = nn.Dropout(dropout)
-        self.linear = nn.Linear(768, output_dim)
+        self.linear = nn.Sequential(
+            nn.Linear(768, 512),
+            nn.ReLU(),
+            nn.Linear(512, output_dim)
+        )
 
     def forward(self, input_id, mask):
         with torch.no_grad():
