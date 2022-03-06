@@ -40,6 +40,8 @@ def parse_args():
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
+    parser.add_argument('-t', '--train_type', type = str, default = 'concat', choices = ['concat', 'non_concat', 'text'],
+                        help = 'Name of the BERT model.')
     
     parser.add_argument('-b', '--BERT_MODEL_NAME', type = str, default = 'bert-base-multilingual-cased', choices = ['bert-base-multilingual-cased', 'bert-base-multilingual-uncased']
                         , help = 'Name of the BERT model.')
@@ -54,7 +56,7 @@ def parse_args():
                         help = 'Learning Rate.')
     parser.add_argument('--weight_decay', type = float, default = 1e-6,
                         help = 'Weight Decay for optimizer.')
-    parser.add_argument('--early_max_stopping', type = str, default = 10, 
+    parser.add_argument('--early_max_stopping', type = int, default = 10, 
                         help = 'Max patience for early stopping.')                    
     parser.add_argument('--n_layers', type = int, default = 1,
                         help = 'Number of Bi-LSTM layers.')
@@ -106,7 +108,7 @@ def main(args):
     print(num_para_verbose)
     
     # Datasets.
-    train_df, val_df, test_df = load_nepsa_dataset(args.data_dir, tokenizer)
+    train_df, val_df, test_df = load_nepsa_dataset(args.data_dir, tokenizer, train_type = args.train_type)
     
     #%% Train model.
     cache_df = train(model, train_df, val_df, device, args)
@@ -149,9 +151,19 @@ if __name__ == '__main__':
     # Parse arguments.
     args = parse_args()
 
-    # Save config in YAML file.
+    """     # Save config in YAML file.
     with open(r'./config_dir/config_{}_{}.yaml'.format(args.model, current_timestamp().split()[0]), 'w') as file:
         yaml.dump(vars(args), file)
 
     # Start training.
     main(args)
+    """
+    tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
+    train_df, val_df, test_df = load_nepsa_dataset(args.data_dir, tokenizer, train_type = args.train_type)
+    a = next(iter(train_df))
+    print(a)
+
+    text_id = a[0]['input_ids']
+    print()
+    print('train type: ', args.train_type, '\n')
+    print([tokenizer.convert_ids_to_tokens(id) for id in text_id])

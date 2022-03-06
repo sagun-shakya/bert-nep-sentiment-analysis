@@ -10,7 +10,7 @@ import pandas as pd
 
 from DatasetBERT import BERTDataset
 
-def load_nepsa_dataset(root_dir, tokenizer):
+def load_nepsa_dataset(root_dir, tokenizer, train_type):
     
     if not os.path.exists(root_dir):
         raise FileNotFoundError
@@ -39,9 +39,9 @@ def load_nepsa_dataset(root_dir, tokenizer):
         raise FileNotFoundError
         
     # Dataloaders.
-    train_data = BERTDataset(df_train[['polarity', 'text']], tokenizer)
-    val_data = BERTDataset(df_val[['polarity', 'text']], tokenizer)
-    test_data = BERTDataset(df_test[['polarity', 'text']], tokenizer)
+    train_data = BERTDataset(df_train, tokenizer, train_type)
+    val_data = BERTDataset(df_val, tokenizer, train_type)
+    test_data = BERTDataset(df_test, tokenizer, train_type)
     
     return train_data, val_data, test_data
     
