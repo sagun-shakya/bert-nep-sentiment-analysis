@@ -12,9 +12,10 @@ from transformers import BertTokenizer
 from pandas import DataFrame
 import random
 from numpy import random as rdm
+import yaml
 
 # Local Modules.
-from model import BertClassifier
+from model import BertClassifier_LSTM, BertClassifier_Linear
 from utils import count_parameters, current_timestamp, visualize_learning
 from trainer import train
 from evaluator import evaluate
@@ -33,20 +34,28 @@ def parse_args():
 
     parser.add_argument('-d', '--data_dir', type = str, metavar='PATH', default = './data/1',
                         help = 'Path to data directory. Contains train, val and test datasets.')    
-    parser.add_argument('-m', '--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
+    parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
+    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_bert_lstm.pt',
+                        help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
     
-    parser.add_argument('-b', '--BERT_MODEL_NAME', type = str, default = 'bert-base-multilingual-cased',
-                        help = 'Name of the BERT model.')
-    
+    parser.add_argument('-b', '--BERT_MODEL_NAME', type = str, default = 'bert-base-multilingual-cased', choices = ['bert-base-multilingual-cased', 'bert-base-multilingual-uncased']
+                        , help = 'Name of the BERT model.')
+
+    parser.add_argument('-m', '--model', type = str, default = 'bert_lstm', choices=['bert_lstm', 'bert_linear'],
+                        help = 'Model architecture to use.')
     parser.add_argument('-e', '--epochs', type = int, default = 10,
                         help = 'Total number of epochs.')
     parser.add_argument('--batch_size', type = int, default = 8,
                         help = 'Number of sentences in a batch.')
     parser.add_argument('-l', '--learning_rate', type = float, default = 0.001,
                         help = 'Learning Rate.')
+    parser.add_argument('--weight_decay', type = float, default = 1e-6,
+                        help = 'Weight Decay for optimizer.')
+    parser.add_argument('--early_max_stopping', type = str, default = 10, 
+                        help = 'Max patience for early stopping.')                    
     parser.add_argument('--n_layers', type = int, default = 1,
                         help = 'Number of Bi-LSTM layers.')
     parser.add_argument('--hidden_dim', type = int, default = 256,
@@ -62,26 +71,27 @@ def parse_args():
     return args
 
 
-def main():
+def main(args):
     # GPU Support.
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    # Parse arguments.
-    args = parse_args()   
-    
     # BERT MODEL NAME.
     BERT_MODEL_NAME = 'bert-base-multilingual-cased'
     
     # BERT Tokenizer.
     tokenizer = BertTokenizer.from_pretrained(BERT_MODEL_NAME)
     
-    # Instantial model architecture.
-    model = BertClassifier(args.BERT_MODEL_NAME, 
-                           n_layers = args.n_layers, 
-                           bidirectional = True, 
-                           hidden_dim = args.hidden_dim, 
-                           output_dim = args.output_dim)
+    # Instantiate model architecture.
+    if args.model == "bert_lstm":
+        model = BertClassifier_LSTM(args.BERT_MODEL_NAME, 
+                                    n_layers = args.n_layers, 
+                                    bidirectional = True, 
+                                    hidden_dim = args.hidden_dim, 
+                                    output_dim = args.output_dim)
+
+    elif args.model == "bert_linear":
+        model = BertClassifier_Linear(args.BERT_MODEL_NAME, output_dim = 2, dropout = 0.5)
 
     if use_cuda:
             model = model.cuda()
@@ -99,13 +109,7 @@ def main():
     train_df, val_df, test_df = load_nepsa_dataset(args.data_dir, tokenizer)
     
     #%% Train model.
-    cache_df = train(model, train_df, val_df, device, 
-                     batch_size = args.batch_size, 
-                     model_save_path = args.model_save_dir, 
-                     cache_save_path = args.cache_dir, 
-                     learning_rate = args.learning_rate,
-                     epochs = args.epochs,
-                     early_max_stopping = 7)
+    cache_df = train(model, train_df, val_df, device, args)
     
     # Testing phase.
     test_dataloader = DataLoader(test_df, batch_size = args.batch_size, shuffle=False)
@@ -124,7 +128,7 @@ def main():
     cache_test = dict(zip(cols, test_results))
 
     # Save cache.
-    test_cache_filepath = join(args.cache_dir, f'test_results_{current_timestamp()}.csv')
+    test_cache_filepath = join(args.cache_dir, f'test_results_{args.model}_{current_timestamp()}.csv')
     DataFrame(cache_test, index = [0]).to_csv(test_cache_filepath)
 
     # Verbose.
@@ -141,4 +145,13 @@ def main():
 
     
 if __name__ == '__main__':
-    main()
+    
+    # Parse arguments.
+    args = parse_args()
+
+    # Save config in YAML file.
+    with open(r'./config_dir/config_{}_{}.yaml'.format(args.model, current_timestamp().split()[0]), 'w') as file:
+        yaml.dump(vars(args), file)
+
+    # Start training.
+    main(args)

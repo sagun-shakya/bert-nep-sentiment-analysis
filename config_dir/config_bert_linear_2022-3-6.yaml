@@ -1,0 +1,15 @@
+BERT_MODEL_NAME: bert-base-multilingual-cased
+batch_size: 8
+cache_dir: ./cache_dir
+data_dir: ./data/1
+early_max_stopping: 10
+epochs: 50
+hidden_dim: 256
+learning_rate: 0.001
+model: bert_linear
+model_name: model_checkpoint_bert_lstm
+model_save_dir: ./saved_model_dir
+n_layers: 1
+output_dim: 2
+visualize: false
+weight_decay: 1.0e-06
