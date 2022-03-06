@@ -26,9 +26,9 @@ def current_timestamp():
     '''
     dateTimeObj = datetime.now()
     date = str(dateTimeObj.year) + '-' + str(dateTimeObj.month) + '-' + str(dateTimeObj.day)
-    time = str(dateTimeObj.hour) + ':' + str(dateTimeObj.minute) + ':' + str(dateTimeObj.second)
+    time = str(dateTimeObj.hour) + '_' + str(dateTimeObj.minute) + '_' + str(dateTimeObj.second)
     
-    return f'{date} || {time}'
+    return f'{date} {time}'
 
 def categorical_accuracy(preds, y):
     '''

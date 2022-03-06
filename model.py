@@ -15,7 +15,7 @@ class BertClassifier_LSTM(nn.Module):
 
     def __init__(self, BERT_MODEL_NAME, n_layers, bidirectional, hidden_dim, output_dim = 2, dropout=0.5):
 
-        super(BertClassifier, self).__init__()
+        super(BertClassifier_LSTM, self).__init__()
 
         self.bert = BertModel.from_pretrained(BERT_MODEL_NAME)
         self.embedding_dim = self.bert.config.to_dict()['hidden_size']

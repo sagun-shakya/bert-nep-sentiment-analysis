@@ -130,7 +130,7 @@ def main(args):
     cache_test = dict(zip(cols, test_results))
 
     # Save cache.
-    test_cache_filepath = join(args.cache_dir, f'test_results_{args.model}_{current_timestamp()}.csv')
+    test_cache_filepath = join(args.cache_dir, f'test_results_{str(args.train_type)}_{args.model}_{current_timestamp()}.csv')
     DataFrame(cache_test, index = [0]).to_csv(test_cache_filepath)
 
     # Verbose.
@@ -151,14 +151,14 @@ if __name__ == '__main__':
     # Parse arguments.
     args = parse_args()
 
-    """     # Save config in YAML file.
-    with open(r'./config_dir/config_{}_{}.yaml'.format(args.model, current_timestamp().split()[0]), 'w') as file:
+    # Save config in YAML file.
+    with open(r'./config_dir/config_{}_{}_{}.yaml'.format(args.model, str(args.train_type), current_timestamp().split()[0]), 'w') as file:
         yaml.dump(vars(args), file)
 
     # Start training.
     main(args)
-    """
-    tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
+
+    """ tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
     train_df, val_df, test_df = load_nepsa_dataset(args.data_dir, tokenizer, train_type = args.train_type)
     a = next(iter(train_df))
     print(a)
@@ -166,4 +166,4 @@ if __name__ == '__main__':
     text_id = a[0]['input_ids']
     print()
     print('train type: ', args.train_type, '\n')
-    print([tokenizer.convert_ids_to_tokens(id) for id in text_id])
+    print([tokenizer.convert_ids_to_tokens(id) for id in text_id]) """
