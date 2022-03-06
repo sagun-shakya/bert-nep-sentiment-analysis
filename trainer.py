@@ -15,19 +15,13 @@ filterwarnings('ignore')
 from evaluator import evaluate
 from utils import categorical_accuracy, classification_metrics, current_timestamp, epoch_time
 
-def train(model, train_df, val_df, device, 
-          batch_size, 
-          model_save_path, 
-          cache_save_path, 
-          learning_rate, 
-          epochs, 
-          early_max_stopping = 10):
+def train(model, train_df, val_df, device, args):
 
-    train_dataloader = torch.utils.data.DataLoader(train_df, batch_size = batch_size)
-    val_dataloader = torch.utils.data.DataLoader(val_df, batch_size = batch_size)
+    train_dataloader = torch.utils.data.DataLoader(train_df, batch_size = args.batch_size)
+    val_dataloader = torch.utils.data.DataLoader(val_df, batch_size = args.batch_size)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = AdamW(model.parameters(), lr = learning_rate, weight_decay = 1e-6)
+    optimizer = AdamW(model.parameters(), lr = args.learning_rate, weight_decay = args.weight_decay)
     
     # Use CUDA.
     use_cuda = torch.cuda.is_available()
@@ -51,7 +45,7 @@ def train(model, train_df, val_df, device,
             'validation f1 score',
             'validation roc-auc score')
 
-    cache = empty((epochs, len(cols)))
+    cache = empty((args.epochs, len(cols)))
     best_val_loss = float('inf')
     total_start_time = time()
     counter = 0
@@ -59,7 +53,7 @@ def train(model, train_df, val_df, device,
     # Store validation predictions.
     pred_store = dict()
 
-    for epoch_num in range(epochs):
+    for epoch_num in range(args.epochs):
 
         total_acc_train = 0
         total_loss_train = 0
@@ -124,9 +118,11 @@ def train(model, train_df, val_df, device,
             best_val_loss = val_loss
             
             # Save model.
-            if not os.path.exists(model_save_path):
+            if not os.path.exists(args.model_save_path):
                 os.mkdir('saved_model_dir')
                 model_save_path = 'saved_model_dir'
+            else:
+                model_save_path = args.model_save_path
 
             save_params = {'epoch': epoch_num + 1, 
                             'state_dict': model.state_dict(),
@@ -136,8 +132,8 @@ def train(model, train_df, val_df, device,
                             'val_loss': val_loss,
                             'val_accuracy': val_acc}
                                
-            torch.save(save_params, os.path.join(model_save_path, 'model_checkpoint.pt'))
-            print(f'Model saved at {model_save_path} on {current_timestamp()}.\n')
+            torch.save(save_params, os.path.join(model_save_path, args.model_name))
+            print(f'\nModel saved at {model_save_path} on {current_timestamp()}.\n')
             counter = 0
         else:
             counter += 1
@@ -157,17 +153,17 @@ def train(model, train_df, val_df, device,
         # Cache.
         cache[epoch_num, :] = [train_loss, train_cat_acc, train_acc, train_pr, train_rec, train_f1, train_auc,
                                val_loss, val_cat_acc, val_acc, val_pr, val_rec, val_f1, val_auc]
-
-        # Early stopping.
-        if counter >= early_max_stopping:
-            print('Maximum tolerance reached! Breaking the training loop.\n')
-            break
         
         if not os.path.exists(cache_save_path):
             os.mkdir('cache_dir')
             cache_save_path = 'cache_dir'
             
         cache_df = DataFrame(cache, columns = cols).to_csv(os.path.join(cache_save_path, f'cache_{current_timestamp().split()[0]}.csv'), index = False)
+
+        # Early stopping.
+        if counter >= args.early_max_stopping:
+            print('Maximum tolerance reached! Breaking the training loop.\n')
+            break
 
     total_end_time = time()
 

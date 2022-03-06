@@ -4,9 +4,9 @@ from utils import categorical_accuracy, classification_metrics
 
 def evaluate(dataloader, model, device, criterion, mode = 'validation'):
     '''
-    Total loss should be divided by the length of the dataloader to get the average value in the current epoch.
-    Total accuracy and other metrics should be divided by the total_examples to get the average value.
+    Evaluation on either validation set or test set.
     '''
+    
     mode = mode.lower()
     assert mode == 'validation' or mode == 'test', "The eval mode should be one of {'validation', 'test'}."
 
