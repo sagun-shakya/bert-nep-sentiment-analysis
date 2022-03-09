@@ -124,15 +124,15 @@ def train(model, train_df, val_df, device, args):
             else:
                 model_save_path = args.model_save_dir
 
-            save_params = {'epoch': epoch_num + 1, 
+            """ save_params = {'epoch': epoch_num + 1, 
                             'state_dict': model.state_dict(),
                             'optimizer': optimizer.state_dict(),
                             'train_loss': train_loss,
                             'train_accuracy': train_acc,
                             'val_loss': val_loss,
-                            'val_accuracy': val_acc}
+                            'val_accuracy': val_acc} """
                                
-            torch.save(save_params, os.path.join(model_save_path, args.model_name))
+            torch.save(model, os.path.join(model_save_path, args.model_name))
             print(f'\nModel saved at {model_save_path} on {current_timestamp()}.\n')
             counter = 0
         else:
@@ -153,14 +153,6 @@ def train(model, train_df, val_df, device, args):
         # Cache.
         cache[epoch_num, :] = [train_loss, train_cat_acc, train_acc, train_pr, train_rec, train_f1, train_auc,
                                val_loss, val_cat_acc, val_acc, val_pr, val_rec, val_f1, val_auc]
-        
-        if not os.path.exists(args.cache_dir):
-            os.mkdir('cache_dir')
-            cache_save_path = 'cache_dir'
-        else:
-            cache_save_path = args.cache_dir
-            
-        cache_df = DataFrame(cache, columns = cols).to_csv(os.path.join(cache_save_path, f'cache_{current_timestamp().split()[0]}.csv'), index = False)
 
         # Early stopping.
         if counter >= args.early_max_stopping:
@@ -168,6 +160,21 @@ def train(model, train_df, val_df, device, args):
             break
 
     total_end_time = time()
+    
+    # Storing results.
+    if not os.path.exists(args.cache_dir):
+        print(f'{args.cache_dir} does not exist. Making a new directory "cache_dir"...\n')
+        os.mkdir('cache_dir')
+        cache_save_path = 'cache_dir'
+    else:
+        cache_save_path = args.cache_dir
+    
+    cache_filename = f'cache_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}.csv'
+    print(f'Saving cache to {cache_save_path} as {cache_filename}.\n')
+    
+    # Saving to a CSV file.
+    cache_filename = os.path.join(cache_save_path, cache_filename)
+    cache_df = DataFrame(cache, columns = cols).to_csv(cache_filename, index = False)
 
     # Calculate total training time.
     epoch_mins, epoch_secs = epoch_time(total_start_time, total_end_time)
