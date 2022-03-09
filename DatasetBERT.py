@@ -8,26 +8,31 @@ class BERTDataset(Dataset):
         assert train_type in choice_train_types, f'Train type should be one of {choice_train_types}.'
 
         self.labels = df['polarity'].tolist()
+        self.ac_size = df['ac'].nunique()
         
         if train_type == 'text':
             self.texts = [tokenizer(text, 
                                     padding='max_length', max_length = 512, truncation=True,
                                     return_tensors="pt") for text in df['text']]
 
-        elif train_type == 'concat':
-            texts = []
-            for ii in range(len(df)):
-                text, ac, at = df[['text', 'ac', 'at']].iloc[ii].to_list()
-                res = tokenizer(text, ac, at, padding="max_length", max_length = 512, truncation=True, return_tensors = "pt")
-                texts.append(res)
-            self.texts = texts
-
-        elif train_type == 'non_concat':
-            texts = []
-            for ii in range(len(df)):
-                text, ac= df[['text', 'ac']].iloc[ii].to_list()
-                res = tokenizer(text, ac, padding="max_length", max_length = 512, truncation=True, return_tensors = "pt")
-                texts.append(res)
+        else:
+            # Concatenating the aspect categories to the text features.
+            df['text'] = df['text'] + " " + df["ac"]
+            
+            # If concat, pass on the aspect terms to the tokenizer. 
+            if train_type == 'concat':
+                texts = []
+                for ii in range(len(df)):
+                    text, at = df[['text', 'at']].iloc[ii].to_list()
+                    res = tokenizer(text, at, padding="max_length", max_length = 512, truncation=True, return_tensors = "pt")
+                    texts.append(res)
+            
+            # If not, pass on the text plus aspect categories.
+            elif train_type == 'non_concat':
+                texts = [tokenizer(text, 
+                                    padding='max_length', max_length = 512, truncation=True,
+                                    return_tensors="pt") for text in df['text']]
+            
             self.texts = texts
         
 

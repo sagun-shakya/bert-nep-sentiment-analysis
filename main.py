@@ -36,7 +36,7 @@ def parse_args():
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_bert_lstm.pt',
+    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_concat_bert_lstm.pt',
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
@@ -48,7 +48,7 @@ def parse_args():
 
     parser.add_argument('-m', '--model', type = str, default = 'bert_lstm', choices=['bert_lstm', 'bert_linear'],
                         help = 'Model architecture to use.')
-    parser.add_argument('-e', '--epochs', type = int, default = 10,
+    parser.add_argument('-e', '--epochs', type = int, default = 60,
                         help = 'Total number of epochs.')
     parser.add_argument('--batch_size', type = int, default = 8,
                         help = 'Number of sentences in a batch.')
@@ -160,6 +160,7 @@ if __name__ == '__main__':
     # Start training.
     main(args)
 
+    # Do not remove. For debuggin purpose.
     """ tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
     train_df, val_df, test_df = load_nepsa_dataset(args.data_dir, tokenizer, train_type = args.train_type)
     a = next(iter(train_df))

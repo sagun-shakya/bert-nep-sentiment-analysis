@@ -33,6 +33,9 @@ class BertClassifier_LSTM(nn.Module):
     def forward(self, input_id, mask):
         with torch.no_grad():
             sequence_output, pooled_output = self.bert(input_ids = input_id, attention_mask = mask, return_dict=False)
+        # sequence_output shape : (batch_size, num_tokens = 512, output_dim = 768)
+        
+        # print(f"\nSequence output shape : ({sequence_output.shape})")
         
         _, (hidden, cell) = self.rnn(sequence_output)
         #hidden = [n layers * n directions, batch size, emb dim]
@@ -41,8 +44,15 @@ class BertClassifier_LSTM(nn.Module):
             hidden = self.dropout(torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim = 1))
         else:
             hidden = self.dropout(hidden[-1,:,:])   # Shape: [batch size, hid dim]
-                
-        output = self.fc(hidden)     # Shape : [batch size, out dim]
+        
+        # Hidden shape : (batch_size, emb_dim = 256 * 2 = 512)
+        
+        #print(f"Hidden shape : ({hidden.shape})")
+        
+        output = self.fc(hidden)     
+        # Shape : [batch size, out dim]
+        #print(f"Output shape : ({output.shape})\n")
+        
         return output
 
 class BertClassifier_Linear(nn.Module):
