@@ -114,8 +114,10 @@ def main(args):
     cache_df = train(model, train_df, val_df, device, args)
     
     # Testing phase.
+    best_model = torch.load(join('saved_model_dir', args.model_name))
+
     test_dataloader = DataLoader(test_df, batch_size = args.batch_size, shuffle=False)
-    test_results = evaluate(test_dataloader, model, device, criterion = None, mode = 'test')
+    test_results = evaluate(test_dataloader, best_model, device, criterion = None, mode = 'test')
     test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc, (y_true_total, y_pred_total) = test_results
 
     # Cache.
