@@ -52,7 +52,7 @@ def parse_args():
                         help = 'Total number of epochs.')
     parser.add_argument('--batch_size', type = int, default = 8,
                         help = 'Number of sentences in a batch.')
-    parser.add_argument('-l', '--learning_rate', type = float, default = 0.001,
+    parser.add_argument('-l', '--learning_rate', type = float, default = 0.0001,
                         help = 'Learning Rate.')
     parser.add_argument('--weight_decay', type = float, default = 1e-6,
                         help = 'Weight Decay for optimizer.')
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     # Start training.
     main(args)
 
-    # Do not remove. For debuggin purpose.
+    # Do not remove. For debugging purpose.
     """ tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
     train_df, val_df, test_df = load_nepsa_dataset(args.data_dir, tokenizer, train_type = args.train_type)
     a = next(iter(train_df))

@@ -5,7 +5,7 @@ data_dir: ./data/1
 early_max_stopping: 10
 epochs: 60
 hidden_dim: 256
-learning_rate: 0.001
+learning_rate: 0.0001
 model: bert_lstm
 model_name: model_checkpoint_concat_bert_lstm.pt
 model_save_dir: ./saved_model_dir
