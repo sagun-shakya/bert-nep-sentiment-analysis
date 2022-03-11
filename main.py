@@ -32,7 +32,7 @@ torch.backends.cudnn.deterministic = True
 def parse_args():
     parser = argparse.ArgumentParser(description="NepSA BERT Argument Parser.")
 
-    parser.add_argument('-d', '--data_dir', type = str, metavar='PATH', default = './data/1',
+    parser.add_argument('-d', '--data_dir', type = str, metavar='PATH', default = './data/kfold',
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
@@ -73,7 +73,7 @@ def parse_args():
     return args
 
 
-def main(args):
+def main(args, k = 1):
     # GPU Support.
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
@@ -108,7 +108,8 @@ def main(args):
     print(num_para_verbose)
     
     # Datasets.
-    train_df, val_df, test_df = load_nepsa_dataset(args.data_dir, tokenizer, train_type = args.train_type)
+    data_dir = join(args.data_dir, str(k))
+    train_df, val_df, test_df = load_nepsa_dataset(data_dir, tokenizer, train_type = args.train_type)
     
     #%% Train model.
     cache_df = train(model, train_df, val_df, device, args)
@@ -132,11 +133,11 @@ def main(args):
     cache_test = dict(zip(cols, test_results))
 
     # Save cache.
-    test_cache_filepath = join(args.cache_dir, f'test_results_{str(args.train_type)}_{args.model}_{current_timestamp()}.csv')
+    test_cache_filepath = join(args.cache_dir, f'test_results_{str(args.train_type)}_{args.model}_{current_timestamp()}_fold_{str(k)}.csv')
     DataFrame(cache_test, index = [0]).to_csv(test_cache_filepath)
 
     # Verbose.
-    print("Test results:\n")
+    print(f"Test results for Fold {str(k)}:\n")
     print('-'*len("Test results:"))
     for k,v in cache_test.items():
         print(f'{k} : {v : .3f}')
