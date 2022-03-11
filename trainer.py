@@ -15,7 +15,7 @@ filterwarnings('ignore')
 from evaluator import evaluate
 from utils import categorical_accuracy, classification_metrics, current_timestamp, epoch_time
 
-def train(model, train_df, val_df, device, args):
+def train(model, train_df, val_df, device, args, k = 1):
 
     train_dataloader = torch.utils.data.DataLoader(train_df, batch_size = args.batch_size)
     val_dataloader = torch.utils.data.DataLoader(val_df, batch_size = args.batch_size)
@@ -169,10 +169,15 @@ def train(model, train_df, val_df, device, args):
     else:
         cache_save_path = args.cache_dir
     
-    cache_filename = f'cache_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}.csv'
+    cache_filename = f'cache_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}_fold_{str(k)}.csv'
     print(f'Saving cache to {cache_save_path} as {cache_filename}.\n')
     
     # Saving to a CSV file.
+    ## MAke a folder.
+    folder_name = f'cache_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}'
+    os.mkdir(folder_name)
+    
+    cache_save_path = os.path.join(cache_save_path, folder_name)
     cache_filename = os.path.join(cache_save_path, cache_filename)
     cache_df = DataFrame(cache, columns = cols).to_csv(cache_filename, index = False)
 

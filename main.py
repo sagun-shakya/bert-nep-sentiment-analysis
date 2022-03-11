@@ -133,7 +133,9 @@ def main(args, k = 1):
     cache_test = dict(zip(cols, test_results))
 
     # Save cache.
-    test_cache_filepath = join(args.cache_dir, f'test_results_{str(args.train_type)}_{args.model}_{current_timestamp()}_fold_{str(k)}.csv')
+    test_cache_folder = f'cache_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}'
+    cache_dir_folder = join(args.cache_dir, test_cache_folder)
+    test_cache_filepath = join(cache_dir_folder, f'test_results_{str(args.train_type)}_{args.model}_{current_timestamp()}_fold_{str(k)}.csv')
     DataFrame(cache_test, index = [0]).to_csv(test_cache_filepath)
 
     # Verbose.
@@ -159,7 +161,10 @@ if __name__ == '__main__':
         yaml.dump(vars(args), file)
 
     # Start training.
-    main(args)
+    for ii in range(5):
+        print(f'\Performing Training for K-Fold = {ii+1}.\n')
+        main(args, k = ii)
+        print('Fold Training Complete.\n')
 
     # Do not remove. For debugging purpose.
     """ tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
