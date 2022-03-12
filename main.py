@@ -4,6 +4,7 @@ Created on Wed Mar  2 11:52:44 2022
 
 @author: Sagun Shakya
 """
+from genericpath import exists
 from os.path import join
 import torch
 from torch.utils.data import DataLoader
@@ -36,11 +37,11 @@ def parse_args():
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_concat_bert_lstm.pt',
+    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_non_concat_bert_lstm.pt',
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
-    parser.add_argument('-t', '--train_type', type = str, default = 'concat', choices = ['concat', 'non_concat', 'text'],
+    parser.add_argument('-t', '--train_type', type = str, default = 'non_concat', choices = ['concat', 'non_concat', 'text'],
                         help = 'Name of the BERT model.')
     
     parser.add_argument('-b', '--BERT_MODEL_NAME', type = str, default = 'bert-base-multilingual-cased', choices = ['bert-base-multilingual-cased', 'bert-base-multilingual-uncased']
@@ -52,7 +53,7 @@ def parse_args():
                         help = 'Total number of epochs.')
     parser.add_argument('--batch_size', type = int, default = 8,
                         help = 'Number of sentences in a batch.')
-    parser.add_argument('-l', '--learning_rate', type = float, default = 0.0001,
+    parser.add_argument('-l', '--learning_rate', type = float, default = 0.001,
                         help = 'Learning Rate.')
     parser.add_argument('--weight_decay', type = float, default = 1e-6,
                         help = 'Weight Decay for optimizer.')
@@ -73,7 +74,7 @@ def parse_args():
     return args
 
 
-def main(args, k = 1):
+def main(args, k: int):
     # GPU Support.
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
@@ -109,7 +110,10 @@ def main(args, k = 1):
     
     # Datasets.
     data_dir = join(args.data_dir, str(k))
-    train_df, val_df, test_df = load_nepsa_dataset(data_dir, tokenizer, train_type = args.train_type)
+    try:
+        train_df, val_df, test_df = load_nepsa_dataset(data_dir, tokenizer, train_type = args.train_type)
+    except:
+        raise FileNotFoundError
     
     #%% Train model.
     cache_df = train(model, train_df, val_df, device, args)
@@ -162,13 +166,18 @@ if __name__ == '__main__':
 
     # Start training.
     for ii in range(5):
-        print(f'\Performing Training for K-Fold = {ii+1}.\n')
-        main(args, k = ii)
+        print(f'\Performing Training for K-Fold = {str(ii+1)}.\n')
+        main(args, k = ii+1)
         print('Fold Training Complete.\n')
+        
+    
 
-    # Do not remove. For debugging purpose.
-    """ tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
-    train_df, val_df, test_df = load_nepsa_dataset(args.data_dir, tokenizer, train_type = args.train_type)
+    """ # Do not remove. For debugging purpose.
+    tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
+    
+    k = 2
+    data_dir = join(args.data_dir, str(k))
+    train_df, val_df, test_df = load_nepsa_dataset(data_dir, tokenizer, train_type = args.train_type)
     a = next(iter(train_df))
     print(a)
 

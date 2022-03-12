@@ -10,11 +10,9 @@ import pandas as pd
 
 from DatasetBERT import BERTDataset
 
-def load_nepsa_dataset(root_dir, tokenizer, train_type):
+def load_nepsa_dataset(root_dir: str, tokenizer, train_type: str):
     
-    if not os.path.exists(root_dir):
-        raise FileNotFoundError
-    
+    print(f'Loading data files from {root_dir}...\n')
     try:
         train_file_path = os.path.join(root_dir, 'train.txt')
         val_file_path = os.path.join(root_dir, 'dev.txt')
