@@ -9,3 +9,5 @@ saved_model_dir/
 __pycache__/
 !/.gitignore
 !data/1/
+images/concat/
+images/non_concat/
