@@ -78,7 +78,8 @@ def main(args):
     # GPU Support.
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
-
+    print(f'\nRunning on CUDA : {use_cuda}\n')
+    
     # BERT MODEL NAME.
     BERT_MODEL_NAME = 'bert-base-multilingual-cased'
     
@@ -183,10 +184,6 @@ if __name__ == '__main__':
 
     # Start training.
     main(args)
-    """ for ii in range(5):
-        print(f'\Performing Training for K-Fold = {str(ii+1)}.\n')
-        main(args, k = ii+1)
-        print('Fold Training Complete.\n') """
         
     
 

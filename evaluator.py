@@ -10,7 +10,7 @@ def evaluate(dataloader, model, device, criterion, mode = 'validation'):
     mode = mode.lower()
     assert mode == 'validation' or mode == 'test', "The eval mode should be one of {'validation', 'test'}."
 
-    print(f"Performing {mode}...\n")
+    print(f"\nPerforming {mode}...\n")
     
     
     model.eval()

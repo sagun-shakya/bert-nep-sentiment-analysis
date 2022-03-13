@@ -3,7 +3,7 @@ batch_size: 8
 cache_dir: ./cache_dir
 data_dir: ./data/kfold
 early_max_stopping: 10
-epochs: 1
+epochs: 60
 hidden_dim: 256
 learning_rate: 0.001
 model: bert_lstm
