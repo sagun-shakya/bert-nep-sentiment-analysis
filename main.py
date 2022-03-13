@@ -37,7 +37,7 @@ def parse_args():
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_non_concat_bert_lstm.pt',
+    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_non_concat_bert_lstm',
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
@@ -64,7 +64,7 @@ def parse_args():
     parser.add_argument('--hidden_dim', type = int, default = 256,
                         help = 'Number of Hidden dimensions of LSTM.')
     parser.add_argument('-o', '--output_dim', type = int, default = 2,
-                        help = 'Number of logits in the finar linear layer.')
+                        help = 'Number of logits in the final linear layer.')
     parser.add_argument('-v', '--visualize', action = 'store_true', default = False,
                         help = 'Whether to viaualize the learning curves.')
 
@@ -74,7 +74,7 @@ def parse_args():
     return args
 
 
-def main(args, k: int):
+def main(args):
     # GPU Support.
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
@@ -108,49 +108,64 @@ def main(args, k: int):
     num_para_verbose = count_parameters(model)
     print(num_para_verbose)
     
-    # Datasets.
-    data_dir = join(args.data_dir, str(k))
-    try:
-        train_df, val_df, test_df = load_nepsa_dataset(data_dir, tokenizer, train_type = args.train_type)
-    except:
-        raise FileNotFoundError
+    # Results aggregated df.
+    res_df = DataFrame()
     
-    #%% Train model.
-    cache_df = train(model, train_df, val_df, device, args)
-    
-    # Testing phase.
-    best_model = torch.load(join('saved_model_dir', args.model_name))
+    # K-fold cross validation.
+    for k in range(1, 5+1):
+        print(f'\nPerforming Training for K-Fold = {str(k)}.\n')
+        
+        # Datasets.
+        data_dir = join(args.data_dir, str(k))
+        try:
+            train_df, val_df, test_df = load_nepsa_dataset(data_dir, tokenizer, train_type = args.train_type)
+        except:
+            raise FileNotFoundError
 
-    test_dataloader = DataLoader(test_df, batch_size = args.batch_size, shuffle=False)
-    test_results = evaluate(test_dataloader, best_model, device, criterion = None, mode = 'test')
-    test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc, (y_true_total, y_pred_total) = test_results
+        #%% Train model.
+        cache_df = train(model, train_df, val_df, device, args, k)
+        
+        # Testing phase.
+        best_model = torch.load(join('saved_model_dir', args.model_name + '_fold_' + str(k) + '.pt'))
 
-    # Cache.
-    ## Store info regarding loss and other metrics.
-    cols = ('testing categorical accuracy',
-            'testing accuracy',
-            'testing precision',
-            'testing recall',
-            'testing f1 score',
-            'testing roc-auc score')
+        test_dataloader = DataLoader(test_df, batch_size = args.batch_size, shuffle=False)
+        test_results = evaluate(test_dataloader, best_model, device, criterion = None, mode = 'test')
+        test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc, (y_true_total, y_pred_total) = test_results
 
-    cache_test = dict(zip(cols, test_results))
+        # Cache.
+        ## Store info regarding loss and other metrics.
+        cols = ('testing categorical accuracy',
+                'testing accuracy',
+                'testing precision',
+                'testing recall',
+                'testing f1 score',
+                'testing roc-auc score')
 
-    # Save cache.
-    test_cache_folder = f'cache_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}'
-    cache_dir_folder = join(args.cache_dir, test_cache_folder)
-    test_cache_filepath = join(cache_dir_folder, f'test_results_{str(args.train_type)}_{args.model}_{current_timestamp()}_fold_{str(k)}.csv')
-    DataFrame(cache_test, index = [0]).to_csv(test_cache_filepath)
+        cache_test = dict(zip(cols, test_results))
 
-    # Verbose.
-    print(f"Test results for Fold {str(k)}:\n")
-    print('-'*len("Test results:"))
-    for k,v in cache_test.items():
-        print(f'{k} : {v : .3f}')
+        # Save cache.
+        test_cache_folder = f'cache_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}'
+        cache_dir_folder = join(args.cache_dir, test_cache_folder)
+        test_cache_filepath = join(cache_dir_folder, f'test_results_{str(args.train_type)}_{args.model}_{current_timestamp()}_fold_{str(k)}.csv')
+        
+        test_df = DataFrame(cache_test, index = [0])
+        test_df.to_csv(test_cache_filepath)
 
-    # Visualization.
-    if args.visualize:
-        visualize_learning(cache_df)
+        # Verbose.
+        print(f"Test results for Fold {str(k)}:\n")
+        print('-'*len("Test results:"))
+        for k,v in cache_test.items():
+            print(f'{k} : {v : .3f}')
+
+        # Visualization.
+        if args.visualize:
+            visualize_learning(cache_df)
+            
+        #print('\nCompleted for Fold : {}\n'.format(str(k)))
+        
+    res_df.reset_index(drop = True, inplace = True)
+    res_cache_filepath = join(cache_dir_folder, f'Results_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}_agg.csv')
+    res_df.to_csv(res_cache_filepath)
         
 
 
@@ -165,10 +180,11 @@ if __name__ == '__main__':
         yaml.dump(vars(args), file)
 
     # Start training.
-    for ii in range(5):
+    main(args)
+    """ for ii in range(5):
         print(f'\Performing Training for K-Fold = {str(ii+1)}.\n')
         main(args, k = ii+1)
-        print('Fold Training Complete.\n')
+        print('Fold Training Complete.\n') """
         
     
 

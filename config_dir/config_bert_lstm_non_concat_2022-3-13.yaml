@@ -7,7 +7,7 @@ epochs: 1
 hidden_dim: 256
 learning_rate: 0.001
 model: bert_lstm
-model_name: model_checkpoint_non_concat_bert_lstm.pt
+model_name: model_checkpoint_non_concat_bert_lstm
 model_save_dir: ./saved_model_dir
 n_layers: 1
 output_dim: 2

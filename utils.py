@@ -50,6 +50,25 @@ def categorical_accuracy(preds, y):
     correct = max_preds.eq(y)
     return correct.sum().item() / torch.FloatTensor([y.shape[0]])
 
+def reset_weights(m):
+    '''
+    Resets the model weights to avoid weight leakage when we go from one run to the next.
+
+    Parameters
+    ----------
+    m : pytorch model.
+
+    Returns
+    -------
+    None.
+
+    '''
+    for layer in m.children():
+        if hasattr(layer, 'reset_parameters'):
+            print(f'Resetting trainable parameters of layer = {layer}')
+            layer.reset_parameters()
+            print('Successful!\n')
+            
 def count_parameters(model):
     '''
     Counts the number of trainable parameters.

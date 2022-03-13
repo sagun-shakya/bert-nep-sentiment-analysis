@@ -13,9 +13,9 @@ filterwarnings('ignore')
 
 # Local Modules.
 from evaluator import evaluate
-from utils import categorical_accuracy, classification_metrics, current_timestamp, epoch_time
+from utils import categorical_accuracy, classification_metrics, current_timestamp, epoch_time, reset_weights
 
-def train(model, train_df, val_df, device, args, k = 1):
+def train(model, train_df, val_df, device, args, k: int):
 
     train_dataloader = torch.utils.data.DataLoader(train_df, batch_size = args.batch_size)
     val_dataloader = torch.utils.data.DataLoader(val_df, batch_size = args.batch_size)
@@ -28,6 +28,9 @@ def train(model, train_df, val_df, device, args, k = 1):
     if use_cuda:
             criterion = criterion.cuda()
 
+    # Reset weights.
+    reset_weights(model)
+    
     # Cache.
     ## Store info regarding loss and other metrics.
     cols = ('training loss',
@@ -134,7 +137,7 @@ def train(model, train_df, val_df, device, args, k = 1):
                             'val_loss': val_loss,
                             'val_accuracy': val_acc} """
                                
-            torch.save(model, os.path.join(model_save_path, args.model_name))
+            torch.save(model, os.path.join(model_save_path, args.model_name + '_fold_' + str(k) + '.pt'))
             print(f'\nModel saved at {model_save_path} on {current_timestamp()}.\n')
             counter = 0
         else:
