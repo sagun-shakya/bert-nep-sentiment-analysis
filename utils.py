@@ -3,6 +3,7 @@ from datetime import datetime
 import torch
 from numpy import zeros
 import matplotlib.pyplot as plt
+import os
 
 def epoch_time(start_time, end_time):
     '''
@@ -131,7 +132,7 @@ def classification_metrics(actual, predicted):
     
     return acc, pr, rec, f1, roc
 
-def visualize_learning(cache_df):
+def visualize_learning(cache_df, save_loc = './images', suffix = 'fold1'):
     plt.figure(figsize = (18,6))
     plt.style.use('classic')
 
@@ -149,6 +150,8 @@ def visualize_learning(cache_df):
     plt.xlabel('Epochs')
     plt.title('Accuracy')
 
+    file1 = os.path.join(save_loc, f'loss_accuracy_{suffix}.png')
+    plt.savefig(file1)
     plt.show()
 
     plt.figure(figsize = (18,6))
@@ -174,5 +177,6 @@ def visualize_learning(cache_df):
     plt.legend()
     plt.xlabel('Epochs')
     plt.title('F1 Score')
-
+    file2 = os.path.join(save_loc, f'metrics_{suffix}.png')
+    plt.savefig(file2)
     plt.show()
