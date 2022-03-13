@@ -150,6 +150,8 @@ def main(args):
         
         test_df = DataFrame(cache_test, index = [0])
         test_df.to_csv(test_cache_filepath)
+        
+        res_df.append(test_df)
 
         # Verbose.
         print(f"Test results for Fold {str(k)}:\n")
