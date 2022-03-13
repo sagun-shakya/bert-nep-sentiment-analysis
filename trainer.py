@@ -96,6 +96,8 @@ def train(model, train_df, val_df, device, args, k = 1):
             model.zero_grad()
             batch_loss.backward()
             optimizer.step()
+            
+        
         
         assert len(y_train_total) == len(y_pred_train_total)
 
@@ -158,6 +160,7 @@ def train(model, train_df, val_df, device, args, k = 1):
         if counter >= args.early_max_stopping:
             print('Maximum tolerance reached! Breaking the training loop.\n')
             break
+        
 
     total_end_time = time()
     
@@ -170,14 +173,16 @@ def train(model, train_df, val_df, device, args, k = 1):
         cache_save_path = args.cache_dir
     
     cache_filename = f'cache_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}_fold_{str(k)}.csv'
-    print(f'Saving cache to {cache_save_path} as {cache_filename}.\n')
     
     # Saving to a CSV file.
-    ## MAke a folder.
+    ## Make a folder.
     folder_name = f'cache_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}'
-    os.mkdir(folder_name)
-    
     cache_save_path = os.path.join(cache_save_path, folder_name)
+    
+    if not os.path.exists(cache_save_path):
+        os.mkdir(cache_save_path)
+    
+    print(f'\nSaving cache to {cache_save_path} as {cache_filename}.\n')
     cache_filename = os.path.join(cache_save_path, cache_filename)
     cache_df = DataFrame(cache, columns = cols).to_csv(cache_filename, index = False)
 
@@ -187,7 +192,7 @@ def train(model, train_df, val_df, device, args, k = 1):
     print("Time Elapsed: %dm %ds"%(epoch_mins, epoch_secs))
 
     # Store validation results.        
-    cache_val_preds = DataFrame(pred_store).to_csv(os.path.join(cache_save_path, f'val_preds_{current_timestamp()}.csv'), index = False)
+    # cache_val_preds = DataFrame(pred_store).to_csv(os.path.join(cache_save_path, f'val_preds_{current_timestamp()}.csv'), index = False)
 
     return cache_df
                  
