@@ -4,6 +4,7 @@
 *.xlsx
 *.log
 .*
+*.png
 cache_dir/
 saved_model_dir/
 __pycache__/

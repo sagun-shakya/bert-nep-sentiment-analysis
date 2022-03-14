@@ -195,7 +195,7 @@ def train(model, train_df, val_df, device, args, k: int):
     print("Time Elapsed: %dm %ds"%(epoch_mins, epoch_secs))
 
     # Store validation results.        
-    # cache_val_preds = DataFrame(pred_store).to_csv(os.path.join(cache_save_path, f'val_preds_{current_timestamp()}.csv'), index = False)
+    cache_val_preds = DataFrame(pred_store).to_csv(os.path.join(cache_save_path, f'val_preds_{current_timestamp()}.csv'), index = False)
 
     return cache_df
                  
