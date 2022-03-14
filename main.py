@@ -37,7 +37,7 @@ def parse_args():
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_concat_bert_lstm',
+    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_concat_bert_lstm_oyesh',
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
@@ -46,18 +46,20 @@ def parse_args():
     
     parser.add_argument('-b', '--BERT_MODEL_NAME', type = str, default = 'bert-base-multilingual-cased', choices = ['bert-base-multilingual-cased', 'bert-base-multilingual-uncased']
                         , help = 'Name of the BERT model.')
+    parser.add_argument('--unfreeze', action = 'store_true',
+                        help = 'Whether to unfreeze the BERT layers. By deafult only the upper layers are dynamic.')
 
     parser.add_argument('-m', '--model', type = str, default = 'bert_lstm', choices=['bert_lstm', 'bert_linear'],
                         help = 'Model architecture to use.')
-    parser.add_argument('-e', '--epochs', type = int, default = 60,
+    parser.add_argument('-e', '--epochs', type = int, default = 6,
                         help = 'Total number of epochs.')
     parser.add_argument('--batch_size', type = int, default = 8,
                         help = 'Number of sentences in a batch.')
-    parser.add_argument('-l', '--learning_rate', type = float, default = 0.001,
+    parser.add_argument('-l', '--learning_rate', type = float, default = 5e-5,
                         help = 'Learning Rate.')
-    parser.add_argument('--weight_decay', type = float, default = 1e-6,
+    parser.add_argument('--weight_decay', type = float, default = 1e-8,
                         help = 'Weight Decay for optimizer.')
-    parser.add_argument('--early_max_stopping', type = int, default = 10, 
+    parser.add_argument('--early_max_stopping', type = int, default = 5, 
                         help = 'Max patience for early stopping.')                    
     parser.add_argument('--n_layers', type = int, default = 1,
                         help = 'Number of Bi-LSTM layers.')
@@ -100,10 +102,11 @@ def main(args):
     if use_cuda:
             model = model.cuda()
 
-    # Freeze BERT layers.
-    for name, param in model.named_parameters():                
-        if name.startswith('bert'):
-            param.requires_grad = False
+    # Freeze BERT layers (by default).
+    if not args.unfreeze:
+        for name, param in model.named_parameters():                
+            if name.startswith('bert'):
+                param.requires_grad = False
             
     # Count the number of trainable parameters.
     num_para_verbose = count_parameters(model)

@@ -28,8 +28,9 @@ def train(model, train_df, val_df, device, args, k: int):
     if use_cuda:
             criterion = criterion.cuda()
 
-    # Reset weights.
-    reset_weights(model)
+    # Reset weights (only when the BERT layers are frozen).
+    if not args.unfreeze:
+        reset_weights(model)
     
     # Cache.
     ## Store info regarding loss and other metrics.
