@@ -11,9 +11,11 @@ import os
 
 from utils import visualize_learning
 
-target = r'./images/concat_lr_1e-4'
-source = r'./cache_dir/cache_concat_bert_lstm_2022-3-14'
-
+target = r'./images/concat_oyesh_freeze'
+source = r'cache_dir/cache_concat_bert_lstm_2022-3-14'
+if not os.path.exists(target):
+    os.mkdir(target)
+    
 filenames = [os.path.join(source, file) for file in os.listdir(source) if file.startswith('cache')]
 
 cache_df_dict = {'fold' + str(ii) : pd.read_csv(filename) for ii, filename in enumerate(filenames, 1)}

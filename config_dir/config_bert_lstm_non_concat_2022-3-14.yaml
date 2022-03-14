@@ -1,0 +1,17 @@
+BERT_MODEL_NAME: bert-base-multilingual-cased
+batch_size: 8
+cache_dir: ./cache_dir
+data_dir: ./data/kfold
+early_max_stopping: 5
+epochs: 6
+hidden_dim: 256
+learning_rate: 5.0e-05
+model: bert_lstm
+model_name: model_checkpoint_non_concat_bert_lstm_oyesh
+model_save_dir: ./saved_model_dir
+n_layers: 1
+output_dim: 2
+train_type: non_concat
+unfreeze: false
+visualize: false
+weight_decay: 1.0e-08
