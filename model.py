@@ -31,7 +31,7 @@ class BertClassifier_LSTM(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, input_id, mask):
-        
+
         sequence_output, pooled_output = self.bert(input_ids = input_id, attention_mask = mask, return_dict=False)
         # sequence_output shape : (batch_size, num_tokens = 512, output_dim = 768)
         

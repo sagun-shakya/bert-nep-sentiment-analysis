@@ -31,7 +31,7 @@ def load_nepsa_dataset(root_dir: str, tokenizer, train_type: str):
         
         print(f"Train shape: {df_train.shape[0]}")
         print(f"Val shape: {df_val.shape[0]}")
-        print(f"Test shape: {df_test.shape[0]}")
+        print(f"Test shape: {df_test.shape[0]}\n")
 
     except :
         raise FileNotFoundError
