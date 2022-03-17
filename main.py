@@ -37,21 +37,23 @@ def parse_args():
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_non_concat_bert_lstm_oyesh',
+    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_concat_muril_lstm',
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
-    parser.add_argument('-t', '--train_type', type = str, default = 'non_concat', choices = ['concat', 'non_concat', 'text'],
+    parser.add_argument('-t', '--train_type', type = str, default = 'concat', choices = ['concat', 'non_concat', 'text'],
                         help = 'Name of the BERT model.')
     
-    parser.add_argument('-b', '--BERT_MODEL_NAME', type = str, default = 'bert-base-multilingual-cased', choices = ['bert-base-multilingual-cased', 'bert-base-multilingual-uncased']
+    parser.add_argument('-b', '--BERT_MODEL_NAME', type = str, default = 'bert-base-multilingual-cased', choices = ['bert-base-multilingual-cased', 'bert-base-multilingual-uncased', 'google/muril-base-cased']
                         , help = 'Name of the BERT model.')
     parser.add_argument('--unfreeze', action = 'store_true',
-                        help = 'Whether to unfreeze the BERT layers. By deafult only the upper layers are dynamic.')
+                        help = 'Whether to unfreeze the BERT layers. By default, only the upper layers are dynamic.')
 
     parser.add_argument('-m', '--model', type = str, default = 'bert_lstm', choices=['bert_lstm', 'bert_linear'],
                         help = 'Model architecture to use.')
-    parser.add_argument('-e', '--epochs', type = int, default = 6,
+    parser.add_argument('-k', '--kfolds', type = int, default = 5,
+                        help = 'Total number of K-folds.')
+    parser.add_argument('-e', '--epochs', type = int, default = 20,
                         help = 'Total number of epochs.')
     parser.add_argument('--batch_size', type = int, default = 8,
                         help = 'Number of sentences in a batch.')
@@ -68,7 +70,7 @@ def parse_args():
     parser.add_argument('-o', '--output_dim', type = int, default = 2,
                         help = 'Number of logits in the final linear layer.')
     parser.add_argument('-v', '--visualize', action = 'store_true', default = False,
-                        help = 'Whether to viaualize the learning curves.')
+                        help = 'Whether to visualize the learning curves.')
 
     
     
@@ -82,13 +84,11 @@ def main(args):
     device = torch.device("cuda" if use_cuda else "cpu")
     print(f'\nRunning on CUDA : {use_cuda}\n')
     
-    # BERT MODEL NAME.
-    BERT_MODEL_NAME = 'bert-base-multilingual-cased'
-    
     # BERT Tokenizer.
-    tokenizer = BertTokenizer.from_pretrained(BERT_MODEL_NAME)
+    tokenizer = BertTokenizer.from_pretrained(args.BERT_MODEL_NAME)
     
     # Instantiate model architecture.
+    print(f'\nUsing model : {args.BERT_MODEL_NAME}\n')
     if args.model == "bert_lstm":
         model = BertClassifier_LSTM(args.BERT_MODEL_NAME, 
                                     n_layers = args.n_layers, 
@@ -116,7 +116,7 @@ def main(args):
     res_df = DataFrame()
     
     # K-fold cross validation.
-    for k in range(1, 5+1):
+    for k in range(1, args.kfolds + 1):
         print(f'\nPerforming Training for K-Fold = {str(k)}.\n')
         
         # Datasets.
@@ -182,9 +182,15 @@ if __name__ == '__main__':
     args = parse_args()
 
     # Save config in YAML file.
-    with open(r'./config_dir/config_{}_{}_{}.yaml'.format(args.model, str(args.train_type), current_timestamp().split()[0]), 'w') as file:
+    yaml_file = r'./config_dir/config_{}_{}_{}.yaml'.format(args.model, str(args.train_type), current_timestamp().split()[0])
+    
+    print('\nSaving configuration in a YAML file...')
+    print(f'File location : {yaml_file}\n')
+    with open(yaml_file, 'w') as file:
         yaml.dump(vars(args), file)
 
+    print('Successful!\n')
+    
     # Start training.
     main(args)
         
