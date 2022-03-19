@@ -37,7 +37,7 @@ def parse_args():
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_concat_muril_lstm',
+    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_concat_muril_lstm_oyesh',
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
@@ -188,8 +188,6 @@ if __name__ == '__main__':
     print(f'File location : {yaml_file}\n')
     with open(yaml_file, 'w') as file:
         yaml.dump(vars(args), file)
-
-    print('Successful!\n')
     
     # Start training.
     main(args)
