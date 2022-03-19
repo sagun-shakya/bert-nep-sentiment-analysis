@@ -17,10 +17,10 @@ def parse_args():
     parser = argparse.ArgumentParser(description = "Visualization of Learning curves.")
     
     parser.add_argument('-i', '--source', 
-                        type = str, metavar='PATH', default = r'cache_dir/cache_concat_bert_lstm_2022-3-14',
+                        type = str, metavar='PATH', default = r'cache_dir/cache_concat_muril_lstm_2022-3-18',
                         help = 'Path to the folder containing cache files.')
     parser.add_argument('-o', '--target', 
-                        type = str, metavar='PATH', default = r'./images/concat_oyesh_freeze',
+                        type = str, metavar='PATH', default = r'./images/muril_trial_oyesh',
                         help = 'Path to the folder to store the images.')
     
     args = parser.parse_args()
