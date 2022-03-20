@@ -9,6 +9,8 @@ import pandas as pd
 import numpy as np
 import os
 import argparse
+from warnings import filterwarnings
+filterwarnings(action = 'ignore')
 
 # Local Module(s).
 from utils import visualize_learning
@@ -28,6 +30,17 @@ def parse_args():
     return args
 
 def main():
+    '''
+    Plots the learning and the metrics curves for each fold.
+    Also, the test results for each folds are displayed in a bar plot (horizontal).
+    The aggregated test results are stored in a CSV file in the source directory.
+    
+    Parameters
+    -----------
+    source -- Path to the directory containing the cache files. This includes the loss/metrics value as well as test results.
+    target -- Path to the directory to store the PNG files of the plots. If the directory doesn't exist, a new one with the same name will be created.
+    '''
+    
     # Parse the arguments.
     args = parse_args()
     target = args.target
@@ -57,7 +70,7 @@ def main():
         assert len(test_filenames) > 0, "No test results in this directory."
         
         # Column names : [testing accuracy, testing precision, testing recall, testing f1 score]
-        # Each result of the run is stored in a dictionary. Call cache_df_dict['fold3'], for example.
+        # Each result of the run is stored in a dictionary. Call test_df_dict['fold3'], for example.
         test_df_dict = {'fold' + str(ii) : pd.read_csv(t_file) for ii, t_file in enumerate(test_filenames, 1)}
         
         # Concat all the dataframes into one.
