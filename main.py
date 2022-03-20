@@ -61,7 +61,7 @@ def parse_args():
                         help = 'Learning Rate.')
     parser.add_argument('--weight_decay', type = float, default = 1e-8,
                         help = 'Weight Decay for optimizer.')
-    parser.add_argument('--early_max_stopping', type = int, default = 5, 
+    parser.add_argument('--early_max_stopping', type = int, default = 8, 
                         help = 'Max patience for early stopping.')                    
     parser.add_argument('--n_layers', type = int, default = 1,
                         help = 'Number of Bi-LSTM layers.')
