@@ -72,14 +72,20 @@ def main():
         
         # Plot horizontal barplot.
         to_plot = df[["testing precision", "testing recall", "testing f1 score"]].T.round(3)
-        plot = to_plot.plot.barh(figsize = (15,8), width = 0.8, color = colors, xticks = np.arange(0,1.1,0.1))
+        plot = to_plot.plot.barh(figsize = (15,8), width = 0.8, color = colors, xticks = np.arange(0,1.1,0.1), edgecolor = 'none')
         
         # Add grids on x-axis.
         plot.xaxis.grid(True, linestyle = '-', linewidth = 0.25)
         
+        # Add Y-tick labels.
+        y_tick_labels = plot.set_yticklabels(['Precision', 'Recall', 'F1 Score'], fontsize = 16)
+        
         # Add annotation.
         for container in plot.containers:
             plot.bar_label(container)
+        
+        # Adjust legend.
+        lgd = plot.legend(loc = 'best', prop = {'size' : 10})
             
         # Filename of the plot generated.
         out_filename = os.path.join(target, 'test_results.png')
@@ -87,6 +93,9 @@ def main():
         # Save file.
         fig = plot.get_figure()
         fig.savefig(out_filename)
+        
+        # Save aggregate test_results.
+        
     
     
     
