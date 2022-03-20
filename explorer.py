@@ -95,7 +95,10 @@ def main():
         fig.savefig(out_filename)
         
         # Save aggregate test_results.
-        
+        df = df.append(df.mean(), ignore_index = True)
+        df = df.round(3)
+        df.index = ['Fold ' + str(ii + 1) for ii in range(len(df) - 1)] + ['Average']
+        df.to_csv(os.path.join(source, 'Aggregated Test Results.csv'))
     
     
     
