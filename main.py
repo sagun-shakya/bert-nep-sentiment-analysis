@@ -4,7 +4,6 @@ Created on Wed Mar  2 11:52:44 2022
 
 @author: Sagun Shakya
 """
-from genericpath import exists
 from os.path import join
 import torch
 from torch.utils.data import DataLoader
@@ -37,7 +36,7 @@ def parse_args():
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_concat_muril_lstm_lr_0.001',
+    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_non_concat_muril_lstm_lr_0_001',
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
@@ -175,7 +174,7 @@ def main(args):
         
 
 
-    
+# Driver Code.    
 if __name__ == '__main__':
     
     # Parse arguments.
