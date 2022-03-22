@@ -36,14 +36,14 @@ def parse_args():
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_non_concat_muril_lstm_lr_0_001',
+    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_concat_muril_lstm_lr_0_001',
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
     parser.add_argument('-t', '--train_type', type = str, default = 'concat', choices = ['concat', 'non_concat', 'text'],
                         help = 'Name of the BERT model.')
     
-    parser.add_argument('-b', '--BERT_MODEL_NAME', type = str, default = 'bert-base-multilingual-cased', choices = ['bert-base-multilingual-cased', 'bert-base-multilingual-uncased', 'google/muril-base-cased']
+    parser.add_argument('-b', '--BERT_MODEL_NAME', type = str, default = 'google/muril-base-cased', choices = ['bert-base-multilingual-cased', 'bert-base-multilingual-uncased', 'google/muril-base-cased']
                         , help = 'Name of the BERT model.')
     parser.add_argument('--unfreeze', action = 'store_true',
                         help = 'Whether to unfreeze the BERT layers. By default, only the upper layers are dynamic.')
@@ -115,7 +115,7 @@ def main(args):
     res_df = DataFrame()
     
     # K-fold cross validation.
-    for k in range(1, args.kfolds + 1):
+    for k in [3,4]:
         print(f'\nPerforming Training for K-Fold = {str(k)}.\n')
         
         # Datasets.
