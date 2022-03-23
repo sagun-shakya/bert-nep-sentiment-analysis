@@ -1,7 +1,7 @@
 #from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from datetime import datetime
 import torch
-from numpy import zeros
+import numpy as np
 import matplotlib.pyplot as plt
 import os
 
@@ -87,7 +87,6 @@ def count_parameters(model):
     num_par = sum(p.numel() for p in model.parameters() if p.requires_grad)    
     return f'\nThe model has {num_par:,} trainable parameters.'
 
-import numpy as np
 
 def comp_confmat(actual, predicted):
 
