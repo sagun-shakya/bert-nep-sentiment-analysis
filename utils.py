@@ -4,6 +4,7 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from shutil import copyfile
 
 def epoch_time(start_time, end_time):
     '''
@@ -87,7 +88,42 @@ def count_parameters(model):
     num_par = sum(p.numel() for p in model.parameters() if p.requires_grad)    
     return f'\nThe model has {num_par:,} trainable parameters.'
 
+def save_ckp(state, is_best, checkpoint_dir):
+    '''
+    Saves the model checkpoint in the desired location.
+    If it is the best mode, it saves the checkpoint in the same location as the checkpoint directory under the name 'best_model.pth'.
+    '''
+    checkpoint_path = os.path.join(checkpoint_dir, 'checkpoint.pth')
+    
+    # Save the state of the model, optimizer and loss at current time step.
+    torch.save(state, checkpoint_path)
+    
+    # If this is the best model, save it as best_model.pth.
+    if is_best:
+        best_checkpoint_path = os.path.join(checkpoint_dir, 'best_model.pth')
+        copyfile(checkpoint_path, best_checkpoint_path)
+        print(f"\nBest model saved at : {best_checkpoint_path}\n")
 
+def load_checkpoint(checkpoint, model, optimizer):
+    
+    # load model weights state_dict.
+    model.load_state_dict(checkpoint['model_state_dict'])
+    print('Previously trained model weights state_dict loaded...')
+    
+    # load trained optimizer state_dict
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    print('Previously trained optimizer state_dict loaded...')
+    
+    # load the criterion
+    criterion = checkpoint['criterion']
+    print('Trained model loss function loaded...')
+    
+    # Load current epoch.
+    epochs = checkpoint['current_epoch']
+    print(f"Current Epoch : {epochs}\n")
+    
+    return model, optimizer, criterion, epochs
+    
 def comp_confmat(actual, predicted):
 
     # extract the different classes
@@ -130,6 +166,8 @@ def classification_metrics(actual, predicted):
     roc = f1 - (np.random.random()/50)
     
     return acc, pr, rec, f1, roc
+
+
 
 def visualize_learning(cache_df, save_loc = './images', suffix = 'fold1'):
     # Loss and Accuracy.
