@@ -115,7 +115,7 @@ def main(args):
     res_df = DataFrame()
     
     # K-fold cross validation.
-    for k in [2]:
+    for k in [5]:
         print(f'\nPerforming Training for K-Fold = {str(k)}.\n')
         
         # Datasets.
