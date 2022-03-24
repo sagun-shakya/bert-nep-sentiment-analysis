@@ -54,8 +54,10 @@ def main():
     filenames = [os.path.join(source, file) for file in os.listdir(source) if file.startswith('cache')]
 
     # Each result of the run is stored in a dictionary. Call cache_df_dict['fold3'], for example.
-    cache_df_dict = {'fold' + str(ii) : pd.read_csv(filename) for ii, filename in enumerate(filenames, 1)}
+    cache_df_dict = {'fold' + str(filename[-5]) : pd.read_csv(filename) for filename in filenames}
 
+    plt.style.use('ggplot')
+    
     # Plot the learning curves for each fold and save it in the target directory.
     for ii in range(1, len(cache_df_dict) + 1):
         fold = 'fold' + str(ii)
@@ -71,7 +73,7 @@ def main():
         
         # Column names : [testing accuracy, testing precision, testing recall, testing f1 score]
         # Each result of the run is stored in a dictionary. Call test_df_dict['fold3'], for example.
-        test_df_dict = {'fold' + str(ii) : pd.read_csv(t_file) for ii, t_file in enumerate(test_filenames, 1)}
+        test_df_dict = {'fold' + str(t_file[-5]) : pd.read_csv(t_file) for t_file in test_filenames}
         
         # Concat all the dataframes into one.
         df = pd.concat(test_df_dict.values()).reset_index(drop = True)
