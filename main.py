@@ -36,7 +36,7 @@ def parse_args():
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = 'model_checkpoint_concat_muril_lstm_lr_0_001',
+    parser.add_argument('--model_name', type = str, default = "model_checkpoint_non_concat_muril_lstm_lr_0_001",
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
@@ -58,9 +58,9 @@ def parse_args():
                         help = 'Number of sentences in a batch.')
     parser.add_argument('-l', '--learning_rate', type = float, default = 5e-5,
                         help = 'Learning Rate.')
-    parser.add_argument('--weight_decay', type = float, default = 1e-8,
+    parser.add_argument('--weight_decay', type = float, default = 1e-3,
                         help = 'Weight Decay for optimizer.')
-    parser.add_argument('--early_max_stopping', type = int, default = 10, 
+    parser.add_argument('--early_max_stopping', type = int, default = 8, 
                         help = 'Max patience for early stopping.')                    
     parser.add_argument('--n_layers', type = int, default = 1,
                         help = 'Number of Bi-LSTM layers.')
@@ -98,7 +98,7 @@ def main(args):
     elif args.model == "bert_linear":
         model = BertClassifier_Linear(args.BERT_MODEL_NAME, output_dim = 2, dropout = 0.5)
 
-    if not use_cuda:
+    if use_cuda:
             model = model.cuda()
 
     # Freeze BERT layers (by default).
@@ -115,7 +115,7 @@ def main(args):
     res_df = DataFrame()
     
     # K-fold cross validation.
-    for k in [5]:
+    for k in [3,4]:
         print(f'\nPerforming Training for K-Fold = {str(k)}.\n')
         
         # Datasets.
@@ -126,10 +126,10 @@ def main(args):
             raise FileNotFoundError
 
         #%% Train model.
-        #cache_df = train(model, train_df, val_df, device, args, k)
+        cache_df = train(model, train_df, val_df, device, args, k)
         
         # Testing phase.
-        #best_model = torch.load(join('saved_model_dir', args.model_name + '_fold_' + str(k) + '.pt'))
+        best_model = torch.load(join('saved_model_dir', args.model_name + '_fold_' + str(k) + '.pt'))
         best_model = torch.load('saved_model_dir/model_checkpoint_concat_muril_lstm_lr_0.001_fold_2.pt')
         test_dataloader = DataLoader(test_df, batch_size = args.batch_size, shuffle=False)
         test_results = evaluate(test_dataloader, best_model, device, criterion = None, mode = 'test')
@@ -147,9 +147,8 @@ def main(args):
         cache_test = dict(zip(cols, test_results))
 
         # Save cache.
-        #test_cache_folder = f'cache_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}'
-        #cache_dir_folder = join(args.cache_dir, test_cache_folder)
-        cache_dir_folder = r'cache_dir/cache_concat_bert_lstm_2022-3-22'
+        test_cache_folder = f'cache_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}'
+        cache_dir_folder = join(args.cache_dir, test_cache_folder)
         test_cache_filepath = join(cache_dir_folder, f'test_results_{str(args.train_type)}_{args.model}_{current_timestamp()}_fold_{str(k)}.csv')
         
         test_df = DataFrame(cache_test, index = [0])
@@ -167,7 +166,7 @@ def main(args):
         if args.visualize:
             visualize_learning(cache_df)
             
-        #print('\nCompleted for Fold : {}\n'.format(str(k)))
+        print('\nCompleted for Fold : {}\n'.format(str(k)))
         
     #res_df.reset_index(drop = True, inplace = True)
     #res_cache_filepath = join(cache_dir_folder, f'Results_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}_agg.csv')
