@@ -132,7 +132,7 @@ def main(args):
         best_model = torch.load(join('saved_model_dir', args.model_name + '_fold_' + str(k) + '.pt'))
         test_dataloader = DataLoader(test_df, batch_size = args.batch_size, shuffle=False)
         test_results = evaluate(test_dataloader, best_model, device, criterion = None, mode = 'test')
-        test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc, (y_true_total, y_pred_total) = test_results
+        test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc, (y_true_total, y_pred_total, ac_test) = test_results
 
         # Cache.
         ## Store info regarding loss and other metrics.
