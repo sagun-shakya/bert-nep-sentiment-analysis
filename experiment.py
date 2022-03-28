@@ -13,7 +13,7 @@ from warnings import filterwarnings
 filterwarnings(action='ignore')
 
 
-bert_model_name = 'google/muril-base-cased'
+bert_model_name = 'bert-base-multilingual-cased'
 tokenizer = BertTokenizer.from_pretrained(bert_model_name)
 
 results_dir = 'results'
@@ -21,10 +21,11 @@ if not os.path.exists(results_dir):
     os.mkdir(results_dir)
 
 model_dir = r'saved_model_dir'
-model_names = ['model_checkpoint_concat_muril_lstm_lr_0_001_fold_1.pt',
-               'model_checkpoint_concat_muril_lstm_lr_0.001_fold_2.pt',
-               'model_checkpoint_concat_muril_lstm_lr_0_001_fold_3.pt',
-               'model_checkpoint_concat_muril_lstm_lr_0_001_fold_4.pt']
+model_names = ['model_checkpoint_concat_bert_lstm_fold_1.pt',
+                'model_checkpoint_concat_bert_lstm_fold_2.pt',
+                'model_checkpoint_concat_bert_lstm_fold_3.pt',
+                'model_checkpoint_concat_bert_lstm_fold_4.pt',
+                'model_checkpoint_concat_bert_lstm_fold_5.pt']
 
 for name in model_names:
     model_path = os.path.join(model_dir, name)
@@ -32,7 +33,7 @@ for name in model_names:
     if os.path.exists(model_path):
         k = model_path[-4]
         best_model = torch.load(model_path)
-        #best_model = best_model.cpu()
+        best_model = best_model.cpu()
     else:
         raise FileNotFoundError
 
@@ -44,7 +45,7 @@ for name in model_names:
 
     train_df, val_df, test_df = load_nepsa_dataset(data_dir, tokenizer, train_type = 'concat')
     test_dataloader = DataLoader(test_df, batch_size = 8, shuffle=False)
-    test_results = evaluate(test_dataloader, best_model, device = 'cuda', criterion = None, mode = 'test')
+    test_results = evaluate(test_dataloader, best_model, device = 'cpu', criterion = None, mode = 'test')
     test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc, (y_true_total, y_pred_total, ac_test) = test_results
 
     df = DataFrame({'True' : y_true_total, 'Pred' : y_pred_total, 'ac' : ac_test})
