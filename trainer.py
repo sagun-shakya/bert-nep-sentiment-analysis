@@ -65,10 +65,11 @@ def train(model, train_df, val_df, device, args, k: int):
 
         y_train_total = []
         y_pred_train_total = []
+        ac_total_train = []
 
         model.train()
 
-        for train_input, train_label in tqdm(train_dataloader):
+        for ac, train_input, train_label in tqdm(train_dataloader):
             
             y_train_total += train_label.tolist()
             train_label = train_label.to(device)
@@ -93,6 +94,9 @@ def train(model, train_df, val_df, device, args, k: int):
             y_pred_train = output.argmax(dim=1)
             y_pred_train_total += y_pred_train.tolist()
 
+            # Append train ac.
+            ac_total_train += ac
+            
             # Number of training examples seen.
             n = len(y_pred_train)
             total_examples_train += n
@@ -113,7 +117,7 @@ def train(model, train_df, val_df, device, args, k: int):
         train_acc, train_pr, train_rec, train_f1, train_auc = classification_metrics(y_train_total, y_pred_train_total)
 
         ## Validation set.
-        val_loss, val_cat_acc, val_acc, val_pr, val_rec, val_f1, val_auc, (y_true_val, y_pred_val) = evaluate(val_dataloader, model, device, criterion, mode = 'validation')
+        val_loss, val_cat_acc, val_acc, val_pr, val_rec, val_f1, val_auc, (y_true_val, y_pred_val, ac_val) = evaluate(val_dataloader, model, device, criterion, mode = 'validation')
         
         # Store val predictions.
         pred_store['True Labels'] = y_true_val

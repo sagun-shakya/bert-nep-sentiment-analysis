@@ -20,9 +20,10 @@ def evaluate(dataloader, model, device, criterion, mode = 'validation'):
 
     y_pred_total = []
     y_true_total = []
+    ac_total = []
 
     with torch.no_grad():
-        for inputs, label in dataloader:
+        for ac, inputs, label in dataloader:
             
             y_true_total += label.tolist()
             label = label.to(device)
@@ -50,6 +51,9 @@ def evaluate(dataloader, model, device, criterion, mode = 'validation'):
             # Number of examples witnessed in this batch.
             n = len(y_pred)
             total_examples += n
+            
+            # Aspect category append.
+            ac_total += ac
 
         assert len(y_pred_total) == len(y_true_total)
         acc, pr, rec, f1, auc = classification_metrics(y_true_total, y_pred_total)
@@ -60,6 +64,6 @@ def evaluate(dataloader, model, device, criterion, mode = 'validation'):
         cat_acc_average = total_cat_acc / len(dataloader)
 
         if mode == 'validation':
-            return loss_average, cat_acc_average, acc, pr, rec, f1, auc, (y_true_total, y_pred_total)
+            return loss_average, cat_acc_average, acc, pr, rec, f1, auc, (y_true_total, y_pred_total, ac_total)
         elif mode == 'test':
-            return cat_acc_average, acc, pr, rec, f1, auc, (y_true_total, y_pred_total)
+            return cat_acc_average, acc, pr, rec, f1, auc, (y_true_total, y_pred_total, ac_total)
