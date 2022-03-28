@@ -9,6 +9,7 @@ class BERTDataset(Dataset):
 
         self.labels = df['polarity'].tolist()
         self.ac_size = df['ac'].nunique()
+        self.ac = list(df['ac'].values.ravel())
         
         if train_type == 'text':
             self.texts = [tokenizer(text, 
@@ -50,9 +51,12 @@ class BERTDataset(Dataset):
         # Fetch a batch of inputs
         return self.texts[idx]
 
+    def get_aspect_categories(self, idx):
+        return self.ac[idx]
+    
     def __getitem__(self, idx):
-
+        batch_ac = self.get_aspect_categories(idx)
         batch_texts = self.get_batch_texts(idx)
         batch_y = self.get_batch_labels(idx)
 
-        return batch_texts, batch_y
+        return batch_ac, batch_texts, batch_y
