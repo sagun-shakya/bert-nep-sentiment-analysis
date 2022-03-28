@@ -1,3 +1,5 @@
+from genericpath import exists
+from pandas import DataFrame
 from evaluator import evaluate
 import os
 from load_data import load_nepsa_dataset
@@ -6,29 +8,67 @@ import torch.nn as nn
 from transformers import BertTokenizer
 from torch.utils.data import DataLoader
 
-tokenizer = BertTokenizer.from_pretrained('google/muril-base-cased')
+from utils import classification_metrics
+from warnings import filterwarnings
+filterwarnings(action='ignore')
 
-model_path = r'saved_model_dir/model_checkpoint_concat_muril_lstm_lr_0.001_fold_2.pt'
-best_model = torch.load('saved_model_dir/model_checkpoint_concat_muril_lstm_lr_0.001_fold_2.pt')
 
-data_dir = r'data/kfold/2'
+bert_model_name = 'google/muril-base-cased'
+tokenizer = BertTokenizer.from_pretrained(bert_model_name)
 
-train_df, val_df, test_df = load_nepsa_dataset(data_dir, tokenizer, train_type = 'concat')
-test_dataloader = DataLoader(test_df, batch_size = 8, shuffle=False)
-test_results = evaluate(test_dataloader, best_model, device = 'cuda', criterion = None, mode = 'test')
-#test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc, (y_true_total, y_pred_total) = test_results
+results_dir = 'results'
+if not os.path.exists(results_dir):
+    os.mkdir(results_dir)
 
-# Cache.
-## Store info regarding loss and other metrics.
-cols = ('testing categorical accuracy',
-        'testing accuracy',
-        'testing precision',
-        'testing recall',
-        'testing f1 score',
-        'testing roc-auc score')
+model_dir = r'saved_model_dir'
+model_names = ['model_checkpoint_concat_muril_lstm_lr_0_001_fold_1.pt',
+               'model_checkpoint_concat_muril_lstm_lr_0.001_fold_2.pt',
+               'model_checkpoint_concat_muril_lstm_lr_0_001_fold_3.pt',
+               'model_checkpoint_concat_muril_lstm_lr_0_001_fold_4.pt']
 
-#cache_test = dict(zip(cols, test_results))
+for name in model_names:
+    model_path = os.path.join(model_dir, name)
 
+    if os.path.exists(model_path):
+        k = model_path[-4]
+        best_model = torch.load(model_path)
+        #best_model = best_model.cpu()
+    else:
+        raise FileNotFoundError
+
+    model_folder_name = os.path.join(results_dir, name[:-3])
+    if not os.path.exists(model_folder_name):
+        os.mkdir(model_folder_name)
+    
+    data_dir = r'data/kfold/' + k
+
+    train_df, val_df, test_df = load_nepsa_dataset(data_dir, tokenizer, train_type = 'concat')
+    test_dataloader = DataLoader(test_df, batch_size = 8, shuffle=False)
+    test_results = evaluate(test_dataloader, best_model, device = 'cuda', criterion = None, mode = 'test')
+    test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc, (y_true_total, y_pred_total, ac_test) = test_results
+
+    df = DataFrame({'True' : y_true_total, 'Pred' : y_pred_total, 'ac' : ac_test})
+    print(df['True'].value_counts(normalize=True).round(3))
+    df.to_csv(os.path.join(model_folder_name, f'preds_fold_{k}.csv'), index = None)
+
+    results = dict()
+    for ac_value in df.ac.unique():
+        yo = df[df['ac'] == ac_value][['True', 'Pred']]
+        y_true = yo['True'].tolist()
+        y_pred = yo['Pred'].tolist()
+
+        acc, pr, rec, f1, roc = classification_metrics(y_true, y_pred)
+        print("for ", ac_value)
+        print([acc, pr, rec, f1])
+        results[ac_value] = [acc, pr, rec, f1]
+        print()
+
+    results = DataFrame(results).T
+    results.columns = ['accuracy', 'precision', 'recall', 'f1 score']
+    results.to_csv(os.path.join(model_folder_name, 'metrics.csv'))
+    
+    
+""" 
 a = next(iter(test_df))
 print(a)
 
@@ -37,4 +77,4 @@ print()
 print('train type: ', 'concat', '\n')
 tokens = [tokenizer.convert_ids_to_tokens(id) for id in text_id]
 print(tokens)
-print(tokenizer.convert_tokens_to_string(tokens[0]))
+print(tokenizer.convert_tokens_to_string(tokens[0])) """
