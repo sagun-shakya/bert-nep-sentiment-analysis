@@ -106,6 +106,11 @@ def main(args):
         for name, param in model.named_parameters():                
             if name.startswith('bert'):
                 param.requires_grad = False
+    else:       
+        # Unfreeze the 11th encoder layer of the transformer.
+        for name, param in model.named_parameters():
+            if (name.startswith('bert')) and (not name.startswith('bert.encoder.layer.11')):
+                param.requires_grad = False
             
     # Count the number of trainable parameters.
     num_para_verbose = count_parameters(model)
