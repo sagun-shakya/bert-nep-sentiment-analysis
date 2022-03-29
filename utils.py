@@ -65,7 +65,7 @@ def reset_weights(m):
     None.
 
     '''
-    for layer in m.children():
+    for name, layer in m.named_children():
         if not name.startswith('bert') and hasattr(layer, 'reset_parameters'):
             print(f'Resetting trainable parameters of layer = {layer}')
             layer.reset_parameters()
