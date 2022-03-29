@@ -12,3 +12,4 @@ __pycache__/
 !data/1/
 images/concat/
 images/non_concat/
+results/
