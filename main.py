@@ -36,7 +36,7 @@ def parse_args():
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = "model_checkpoint_non_concat_muril_lstm_lr_0_001",
+    parser.add_argument('--model_name', type = str, default = "model_checkpoint_concat_muril_lstm_lr_0_001_unfreeze",
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
@@ -120,7 +120,7 @@ def main(args):
     res_df = DataFrame()
     
     # K-fold cross validation.
-    for k in [3,4]:
+    for k in [4]:
         print(f'\nPerforming Training for K-Fold = {str(k)}.\n')
         
         # Datasets.
@@ -170,7 +170,7 @@ def main(args):
         if args.visualize:
             visualize_learning(cache_df)
             
-        print('\nCompleted for Fold : {}\n'.format(str(k)))
+        #print('\nCompleted for Fold : {}\n'.format(str(k)))
         
     #res_df.reset_index(drop = True, inplace = True)
     #res_cache_filepath = join(cache_dir_folder, f'Results_{str(args.train_type)}_{args.model}_{current_timestamp().split()[0]}_agg.csv')
