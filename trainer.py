@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-#from torch.optim import Adam
 from time import time
 from transformers import AdamW
 from tqdm import tqdm
