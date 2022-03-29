@@ -106,6 +106,11 @@ def main(args):
         for name, param in model.named_parameters():                
             if name.startswith('bert'):
                 param.requires_grad = False
+    else:       
+        # Unfreeze the 11th encoder layer of the transformer.
+        for name, param in model.named_parameters():
+            if (name.startswith('bert')) and (not name.startswith('bert.encoder.layer.11')):
+                param.requires_grad = False
             
     # Count the number of trainable parameters.
     num_para_verbose = count_parameters(model)
@@ -132,7 +137,7 @@ def main(args):
         best_model = torch.load(join('saved_model_dir', args.model_name + '_fold_' + str(k) + '.pt'))
         test_dataloader = DataLoader(test_df, batch_size = args.batch_size, shuffle=False)
         test_results = evaluate(test_dataloader, best_model, device, criterion = None, mode = 'test')
-        test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc, (y_true_total, y_pred_total) = test_results
+        test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc, (y_true_total, y_pred_total, ac_test) = test_results
 
         # Cache.
         ## Store info regarding loss and other metrics.
