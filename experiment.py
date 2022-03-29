@@ -21,11 +21,10 @@ if not os.path.exists(results_dir):
     os.mkdir(results_dir)
 
 model_dir = r'saved_model_dir'
-model_names = ['model_checkpoint_non_concat_bert_lstm_fold_1.pt',
-                'model_checkpoint_non_concat_bert_lstm_fold_2.pt',
-                'model_checkpoint_non_concat_bert_lstm_fold_3.pt',
-                'model_checkpoint_non_concat_bert_lstm_fold_4.pt',
-                'model_checkpoint_non_concat_bert_lstm_fold_5.pt']
+model_names = ['model_checkpoint_non_concat_muril_lstm_lr_0_001_fold_1.pt',
+                'model_checkpoint_non_concat_muril_lstm_lr_0_001_fold_2.pt',
+                'model_checkpoint_non_concat_muril_lstm_lr_0_001_fold_3.pt',
+                'model_checkpoint_non_concat_muril_lstm_lr_0_001_fold_4.pt']
 
 for name in model_names:
     model_path = os.path.join(model_dir, name)
