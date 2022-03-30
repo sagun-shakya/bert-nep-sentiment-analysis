@@ -36,7 +36,7 @@ def parse_args():
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = "model_checkpoint_concat_muril_lstm_lr_0_001_unfreeze",
+    parser.add_argument('--model_name', type = str, default = "model_checkpoint_non_concat_muril_lstm_lr_0_001_unfreeze",
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
@@ -56,7 +56,7 @@ def parse_args():
                         help = 'Total number of epochs.')
     parser.add_argument('--batch_size', type = int, default = 8,
                         help = 'Number of sentences in a batch.')
-    parser.add_argument('-l', '--learning_rate', type = float, default = 5e-5,
+    parser.add_argument('-l', '--learning_rate', type = float, default = 1e-6,
                         help = 'Learning Rate.')
     parser.add_argument('--weight_decay', type = float, default = 1e-3,
                         help = 'Weight Decay for optimizer.')
@@ -120,7 +120,7 @@ def main(args):
     res_df = DataFrame()
     
     # K-fold cross validation.
-    for k in [4]:
+    for k in [1]:
         print(f'\nPerforming Training for K-Fold = {str(k)}.\n')
         
         # Datasets.
