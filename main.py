@@ -60,7 +60,7 @@ def parse_args():
                         help = 'Learning Rate.')
     parser.add_argument('--weight_decay', type = float, default = 1e-3,
                         help = 'Weight Decay for optimizer.')
-    parser.add_argument('--early_max_stopping', type = int, default = 8, 
+    parser.add_argument('--early_max_stopping', type = int, default = 5, 
                         help = 'Max patience for early stopping.')                    
     parser.add_argument('--n_layers', type = int, default = 1,
                         help = 'Number of Bi-LSTM layers.')
@@ -120,7 +120,7 @@ def main(args):
     res_df = DataFrame()
     
     # K-fold cross validation.
-    for k in [1]:
+    for k in [5]:
         print(f'\nPerforming Training for K-Fold = {str(k)}.\n')
         
         # Datasets.

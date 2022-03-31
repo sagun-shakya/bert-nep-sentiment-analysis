@@ -2,7 +2,7 @@ BERT_MODEL_NAME: google/muril-base-cased
 batch_size: 8
 cache_dir: ./cache_dir
 data_dir: ./data/kfold
-early_max_stopping: 8
+early_max_stopping: 5
 epochs: 50
 hidden_dim: 256
 kfolds: 5
