@@ -13,3 +13,4 @@ __pycache__/
 images/concat/
 images/non_concat/
 results/
+data/nepcls/
