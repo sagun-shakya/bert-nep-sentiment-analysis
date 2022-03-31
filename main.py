@@ -32,11 +32,11 @@ torch.backends.cudnn.deterministic = True
 def parse_args():
     parser = argparse.ArgumentParser(description="NepSA BERT Argument Parser.")
 
-    parser.add_argument('-d', '--data_dir', type = str, metavar='PATH', default = './data/kfold',
+    parser.add_argument('-d', '--data_dir', type = str, metavar='PATH', default = './data/kfold_new',
                         help = 'Path to data directory. Contains train, val and test datasets.')    
     parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = "model_checkpoint_non_concat_muril_lstm_lr_0_001_unfreeze",
+    parser.add_argument('--model_name', type = str, default = "model_new_checkpoint_concat_muril_lstm_lr_0_001",
                         help = 'Filename of the checkpoint file.')
     parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
                         help = 'Path to save cache.')
@@ -56,11 +56,11 @@ def parse_args():
                         help = 'Total number of epochs.')
     parser.add_argument('--batch_size', type = int, default = 8,
                         help = 'Number of sentences in a batch.')
-    parser.add_argument('-l', '--learning_rate', type = float, default = 1e-6,
+    parser.add_argument('-l', '--learning_rate', type = float, default = 1e-3,
                         help = 'Learning Rate.')
-    parser.add_argument('--weight_decay', type = float, default = 1e-3,
+    parser.add_argument('--weight_decay', type = float, default = 1e-6,
                         help = 'Weight Decay for optimizer.')
-    parser.add_argument('--early_max_stopping', type = int, default = 5, 
+    parser.add_argument('--early_max_stopping', type = int, default = 8, 
                         help = 'Max patience for early stopping.')                    
     parser.add_argument('--n_layers', type = int, default = 1,
                         help = 'Number of Bi-LSTM layers.')
@@ -120,7 +120,7 @@ def main(args):
     res_df = DataFrame()
     
     # K-fold cross validation.
-    for k in [5]:
+    for k in [1,2,3]:
         print(f'\nPerforming Training for K-Fold = {str(k)}.\n')
         
         # Datasets.
