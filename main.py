@@ -32,13 +32,13 @@ torch.backends.cudnn.deterministic = True
 def parse_args():
     parser = argparse.ArgumentParser(description="NepSA BERT Argument Parser.")
 
-    parser.add_argument('-d', '--data_dir', type = str, metavar='PATH', default = './data/kfold_new',
+    parser.add_argument('-d', '--data_dir', type = str, metavar='PATH', default = './data/kfold_augmented',
                         help = 'Path to data directory. Contains train, val and test datasets.')    
-    parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir',
+    parser.add_argument('--model_save_dir', type = str, metavar='PATH', default = './saved_model_dir/augmented',
                         help = 'Path to save model.')
-    parser.add_argument('--model_name', type = str, default = "model_new_checkpoint_concat_muril_lstm_lr_0_001",
+    parser.add_argument('--model_name', type = str, default = "model_aug_checkpoint_concat_muril_lstm_freeze_lr_0_001",
                         help = 'Filename of the checkpoint file.')
-    parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir',
+    parser.add_argument('-c', '--cache_dir', type = str, metavar='PATH', default = './cache_dir/augmented_cache_dir',
                         help = 'Path to save cache.')
     parser.add_argument('-t', '--train_type', type = str, default = 'concat', choices = ['concat', 'non_concat', 'text'],
                         help = 'Name of the BERT model.')
@@ -120,7 +120,7 @@ def main(args):
     res_df = DataFrame()
     
     # K-fold cross validation.
-    for k in [1,2,3]:
+    for k in [1]:
         print(f'\nPerforming Training for K-Fold = {str(k)}.\n')
         
         # Datasets.
