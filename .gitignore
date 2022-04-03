@@ -14,4 +14,4 @@ images/concat/
 images/non_concat/
 results/
 data/nepcls/
-data/kfold_new/
+data/kfold_augmented
