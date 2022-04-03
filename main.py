@@ -120,7 +120,7 @@ def main(args):
     res_df = DataFrame()
     
     # K-fold cross validation.
-    for k in [1]:
+    for k in [1,2,3,4,5]:
         print(f'\nPerforming Training for K-Fold = {str(k)}.\n')
         
         # Datasets.
@@ -134,7 +134,7 @@ def main(args):
         cache_df = train(model, train_df, val_df, device, args, k)
         
         # Testing phase.
-        best_model = torch.load(join('saved_model_dir', args.model_name + '_fold_' + str(k) + '.pt'))
+        best_model = torch.load(join(args.model_save_dir, args.model_name + '_fold_' + str(k) + '.pt'))
         test_dataloader = DataLoader(test_df, batch_size = args.batch_size, shuffle=False)
         test_results = evaluate(test_dataloader, best_model, device, criterion = None, mode = 'test')
         test_cat_acc, test_acc, test_pr, test_rec, test_f1, test_auc, (y_true_total, y_pred_total, ac_test) = test_results
